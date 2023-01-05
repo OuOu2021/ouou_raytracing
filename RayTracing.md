@@ -1,6 +1,7 @@
 # Ray Tracing in One Week Notes
 [the book](https://raytracing.github.io/)
-用Rust实现
+[Ray Tracing in One Weekend 超详解](https://www.cnblogs.com/lv-anchoret/p/10163205.html)
+用Rust实现，记录对the book的学习理解进程，与对Rust特性的学习探索有感
 
 ## Output an Image
 了解PPM格式
@@ -25,14 +26,18 @@ r g b
 
 ## Ray, a Simple Camera, and Background
 ### Ray Class
-起点和方向组成一束光线(t为整数时为射线)
-
-光线追踪器发送光，并计算这些光路方向上的颜色。需要以下几步：
-1. 计算从眼睛到像素的光线(光路可逆)
-2. 判断哪个物体与光线相交
-3. 计算出相交点上的颜色 
+起点和方向组成一束光线(t为正数时为射线)
 
 ### 在场景中发射光线
+光线追踪器发送光，并计算这些光路方向上的颜色。需要以下几步：
+1. 计算从眼睛到像素的光线(光路可逆)，将射线从视点发射到像素坐标
+2. 判断哪个物体与光线相交，相交位置
+3. 计算出相交点上的颜色
+
+发射时射线向量并不需要是单位向量
+
+除了设置渲染图像的像素尺寸外，我们还需要设置一个**虚拟视口**来**传递我们的场景光线**。对于标准的正方形像素间距，视口的纵横比应该与我们渲染的图像相同。我们只选择一个高度为两个单位(-1~+1)的视口。我们还**将投影平面和投影点之间的距离设置为一个单位**。这被称为“焦长度”(`focal_length`)，不是焦距！
+
 ![](2023-01-05-10-18-27.png)
 左手系,相机在(0,0,0),x正方向为右，y正方向为上，场景的z为负数
 
@@ -42,3 +47,11 @@ r g b
   >[Must a const fn behave exactly the same at runtime as at compile-time?](https://github.com/rust-lang/rust/issues/77745)
 * 敬佩Rust社区的严谨态度，但我没有时间深究这些`issues`, `unstable`和`experimental`了，最后还是放弃了使用过多的编译期计算
 
+线性混合公式(Blend)：$blendedValue=(1−t)\cdot startValue+t\cdot endValue$
+
+`ray_color()`利用混合公式线性地将白色与天蓝色混合
+
+主要以下几步:
+
+1. 确定分辨率: 假定宽度400,比例16:9
+2. 确定坐标映射系统，场景左下角为(-2,-1,-1)，右上角为(2,1,-1)，中点为(0,0,-1)；摄影机(0,0,0)
