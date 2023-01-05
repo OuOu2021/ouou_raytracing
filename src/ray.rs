@@ -14,10 +14,10 @@ impl Default for Ray {
     }
 }
 impl Ray {
-    pub fn new(p: &Point3, v: &Vec3) -> Self {
+    pub fn new(p: Point3, v: Vec3) -> Self {
         Self {
-            orig: p.clone(),
-            dir: v.clone(),
+            orig: p,
+            dir: v,
         }
     }
     pub fn origin(&self) -> Point3 {
