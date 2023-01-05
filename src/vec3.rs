@@ -27,7 +27,7 @@ impl Vec3 {
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { e: [x, y, z] }
     }
-    pub fn to_usize(&self) -> (usize, usize, usize) {
+    pub fn to_color(&self) -> (usize, usize, usize) {
         let x = (self.e[0] * 255.999) as usize;
         let y = (self.e[1] * 255.999) as usize;
         let z = (self.e[2] * 255.999) as usize;
@@ -218,6 +218,9 @@ impl Color {
     }
     pub const fn blue() -> Self {
         Color(Vec3::new(0., 0., 1.))
+    }
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
+        Color(Vec3::new(x, y, z))
     }
 }
 
