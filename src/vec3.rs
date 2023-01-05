@@ -24,8 +24,8 @@ impl Vec3 {
     pub const fn zero() -> Self {
         Self { e: [0., 0., 0.] }
     }
-    pub const fn new(a: f64, b: f64, c: f64) -> Self {
-        Self { e: [a, b, c] }
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { e: [x, y, z] }
     }
     pub fn to_usize(&self) -> (usize, usize, usize) {
         let x = (self.e[0] * 255.999) as usize;
@@ -206,23 +206,38 @@ impl Display for Point3 {
     }
 }
 
-impl Color{
-    pub const fn white() -> Self{
-        Color(Vec3::new(1.,1.,1.))
+impl Color {
+    pub const fn white() -> Self {
+        Color(Vec3::new(1., 1., 1.))
     }
-    pub const fn red() -> Self{
-        Color(Vec3::new(1.,0.,0.))
+    pub const fn red() -> Self {
+        Color(Vec3::new(1., 0., 0.))
     }
-    pub const fn green() -> Self{
-        Color(Vec3::new(0.,1.,0.))
+    pub const fn green() -> Self {
+        Color(Vec3::new(0., 1., 0.))
     }
-    pub const fn blue() -> Self{
-        Color(Vec3::new(0.,0.,1.))
+    pub const fn blue() -> Self {
+        Color(Vec3::new(0., 0., 1.))
     }
 }
 
-impl Point3{
-    pub const fn zero() -> Self{
-        Point3(Vec3::new(0.,0.,0.))
+impl Point3 {
+    pub const fn zero() -> Self {
+        Point3(Vec3::new(0., 0., 0.))
+    }
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
+        Point3(Vec3::new(x, y, z))
+    }
+}
+
+impl Sub<Point3> for Point3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Point3) -> Self::Output {
+        Vec3::new(
+            self.0[0] - rhs.0[0],
+            self.0[1] - rhs.0[1],
+            self.0[2] - rhs.0[2],
+        )
     }
 }

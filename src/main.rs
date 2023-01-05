@@ -1,25 +1,37 @@
-use std::io::{stdout, stdin};
+use std::io::{stdin, stdout};
 
-use ouou_raytracing::{color::*, vec3::*, MyResult, ray::Ray};
+use ouou_raytracing::{color::*, ray::Ray, vec3::*, MyResult};
 
+fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> bool {
+    let oc = ray.origin() - center;
+    let a = ray.direction().dot_mul(ray.direction());
+    let b = 2. * oc.dot_mul(ray.direction());
+    let c = oc.dot_mul(oc) - radius * radius;
+
+    b * b - 4. * a * c > 0.
+}
 /// 接受光线，计算光线打在视口上的颜色
-fn ray_color(r: Ray) -> Color{
-    // 标准化
-    let unit_direction = r.direction().to_unit();
+fn ray_color(r: Ray) -> Color {
+    if hit_sphere(Point3::new(0., 0., -1.), 0.5, &r) {
+        Color::red()
+    } else {
+        // 标准化
+        let unit_direction = r.direction().to_unit();
 
-    // 把y作为t来线性混合，同时确保t是正数所以做了这么个转换
-    let t = 0.5*(unit_direction.get_y() + 1.0);
+        // 把y作为t来线性混合，同时确保t是正数所以做了这么个转换
+        let t = 0.5 * (unit_direction.get_y() + 1.0);
 
-    // Blend 公式 天蓝色和白色混合
-    Color((1. - t)*Color(Vec3::new(1.,1.,1.)).0+t*Color(Vec3::new(0.5,0.7,1.)).0)
+        // Blend 公式 天蓝色和白色混合，其实就是二维线性插值
+        Color((1. - t) * Color(Vec3::new(1., 1., 1.)).0 + t * Color(Vec3::new(0.5, 0.7, 1.)).0)
+    }
 }
 fn main() -> MyResult {
     // Image
     // 横纵比
-    const ASPECT_RATIO: f64 = 16./9.;
+    const ASPECT_RATIO: f64 = 16. / 9.;
     const IMAGE_WIDTH: usize = 400;
-    const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;//225
-    
+    const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize; //225
+
     // Camera
     // 视口高度
     let viewport_height: f64 = 2.0;
@@ -28,24 +40,30 @@ fn main() -> MyResult {
     let focal_length: f64 = 1.0;
 
     // 原点
-    let origin: Point3 = Point3::zero(); 
+    let origin: Point3 = Point3::zero();
     // 水平
-    let horizontal: Vec3 = Vec3::new(viewport_width,0.,0.);
+    let horizontal: Vec3 = Vec3::new(viewport_width, 0., 0.);
     // 竖直
-    let vertical: Vec3 = Vec3::new(0.,viewport_height,0.);
+    let vertical: Vec3 = Vec3::new(0., viewport_height, 0.);
     // 左下角坐标
-    let lower_left_corner: Point3 = Point3(origin.0 - horizontal/2. - vertical/2. - Vec3::new(0.,0.,focal_length));
-    
+    let lower_left_corner: Point3 =
+        Point3(origin.0 - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., focal_length));
+
     // Render
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
 
     for j in (0..IMAGE_HEIGHT).rev() {
-        eprintln!("\rScanlines remaining: {j} ");
+        if j % 10 == 0 {
+            eprintln!("\rScanlines remaining: {j} ");
+        }
         for i in 0..IMAGE_WIDTH {
             //将像素坐标转换为场景坐标
             let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
             let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let r = Ray::new(origin,lower_left_corner.0 + u * horizontal + v * vertical - origin.0);
+            let r = Ray::new(
+                origin,
+                lower_left_corner.0 + u * horizontal + v * vertical - origin.0,
+            );
             let col = ray_color(r);
             write_color(&mut stdout(), &col)?;
         }
