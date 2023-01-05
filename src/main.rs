@@ -4,16 +4,15 @@ use ouou_raytracing::{color::*, ray::Ray, vec3::*, MyResult};
 
 fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
     let oc = ray.origin() - center;
-    let a = ray.direction().dot_mul(ray.direction());
-    let b = 2. * oc.dot_mul(ray.direction());
-    let c = oc.dot_mul(oc) - radius * radius;
-    let delta = b * b - 4. * a * c ;
+    let a = ray.direction().len_squared();
+    let half_b = oc.dot_mul(ray.direction());
+    let c = oc.len_squared() - radius * radius;
+    let delta = half_b * half_b - a * c;
     if delta < 0. {
         None
-    }
-    else {
+    } else {
         //目前两个解都肯定是正的，所以小的那个解就是近处的交点
-        Some((-b-delta.sqrt())/(2.*a))
+        Some((-half_b - delta.sqrt()) / a)
     }
 }
 /// 接受光线，计算光线打在视口上的颜色
@@ -22,8 +21,8 @@ fn ray_color(r: Ray) -> Color {
     let t = hit_sphere(Point3::new(0., 0., -1.), 0.5, &r);
     if let Some(tt) = t {
         //计算出朝外的法向量
-        let n = r.at(tt) - Point3::new(0.,0.,-1.);
-        Color(0.5*Color::new(n.get_x()+1.,n.get_y()+1.,n.get_z()+1.).0)
+        let n = r.at(tt) - Point3::new(0., 0., -1.);
+        Color(0.5 * Color::new(n.get_x() + 1., n.get_y() + 1., n.get_z() + 1.).0)
     } else {
         // 标准化
         let unit_direction = r.direction().to_unit();
