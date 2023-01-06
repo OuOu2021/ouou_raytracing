@@ -94,3 +94,7 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 
 ![](imgs/2023-01-05-21-14-43.png)
 
+#### 优化公式
+
+#### 抽象出与光线交互的物体Object
+
