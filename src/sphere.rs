@@ -11,6 +11,7 @@ impl Sphere{
 }
 impl Hittable for Sphere{
     fn hit(&self, ray: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
+        //光源指向球心
         let oc = ray.origin() - self.center;
         let a = ray.direction().len_squared();
         let half_b = oc.dot_mul(ray.direction());

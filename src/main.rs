@@ -23,9 +23,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     //返回交点t值，也就能算出交点坐标
     let t = world.hit(&r, &(0.0..INFINITY));
     if let Some(tt) = t {
-        //计算出朝外的法向量
-        let n = r.at(tt.t) - Point3::new(0., 0., -1.);
-        Color(0.5 * Color::new(n.get_x() + 1., n.get_y() + 1., n.get_z() + 1.).0)
+        Color(0.5*(tt.normal+Color::new(1.,1.,1.).0))
     } else {
         // 标准化
         let unit_direction = r.direction().to_unit();
