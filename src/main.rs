@@ -52,7 +52,7 @@ fn main() -> MyResult {
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize; //225
     const SAMPLE_PER_PIXEL: u32 = 100;
-    const MAX_DEPTH: u32 = 10;
+    const MAX_DEPTH: u32 = 50;
 
     // World
     let mut world = HittableList::new();
