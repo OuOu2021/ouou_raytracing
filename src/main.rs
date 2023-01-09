@@ -1,6 +1,11 @@
-use std::{io::{stdin, stdout}, f64::INFINITY};
-
-use ouou_raytracing::{color::*, ray::Ray, vec3::*, MyResult, hittable::*,hittable_list::*, sphere::Sphere};
+use ouou_raytracing::{
+    camera::Camera, color::*, hittable::*, hittable_list::*, ray::Ray, sphere::Sphere, utility::*,
+    vec3::*, MyResult,
+};
+use std::{
+    f64::INFINITY,
+    io::{stdout},
+};
 
 /* 弃用
 fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
@@ -23,7 +28,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     //返回交点t值，也就能算出交点坐标
     let t = world.hit(&r, &(0.0..INFINITY));
     if let Some(tt) = t {
-        Color(0.5*(tt.normal+Color::new(1.,1.,1.).0))
+        Color(0.5 * (tt.normal + Color::new(1., 1., 1.).0))
     } else {
         // 标准化
         let unit_direction = r.direction().to_unit();
@@ -36,35 +41,25 @@ fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     }
 }
 fn main() -> MyResult {
+    // 初始化
+    let mut rng = thread_rng();
+
     // Image
     // 横纵比
     const ASPECT_RATIO: f64 = 16. / 9.;
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize; //225
+    const SAMPLE_PER_PIXEL: u32 = 100;
 
-    // World 
+    // World
     let mut world = HittableList::new();
-    
-    world.add(Box::new(Sphere::new(Point3::new(0.,0.,-1.),0.5)));
-    world.add(Box::new(Sphere::new(Point3::new(0.,-100.5,-1.),100.)));
+
+    world.add(Box::new(Sphere::new(Point3::new(0., 0., -1.), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new(0., -100.5, -1.), 100.)));
 
     // Camera
-    // 视口高度
-    let viewport_height: f64 = 2.0;
-    let viewport_width: f64 = ASPECT_RATIO * viewport_height;
-    // 焦平面到摄像机的距离
-    let focal_length: f64 = 1.0;
-    
-    // 原点
-    let origin: Point3 = Point3::zero();
-    // 水平
-    let horizontal: Vec3 = Vec3::new(viewport_width, 0., 0.);
-    // 竖直
-    let vertical: Vec3 = Vec3::new(0., viewport_height, 0.);
-    // 左下角坐标
-    let lower_left_corner: Point3 =
-        Point3(origin.0 - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., focal_length));
-    
+    let cam = Camera::default();
+
     // Render
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
 
@@ -73,15 +68,16 @@ fn main() -> MyResult {
             eprintln!("\rScanlines remaining: {j} ");
         }
         for i in 0..IMAGE_WIDTH {
-            //将像素坐标转换为场景坐标
-            let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let r = Ray::new(
-                origin,
-                lower_left_corner.0 + u * horizontal + v * vertical - origin.0,
-            );
-            let col = ray_color(&r, &world);
-            write_color(&mut stdout(), &col)?;
+            let mut pixel_color = Color::black();
+            for _ in 0..SAMPLE_PER_PIXEL {
+                //将像素坐标转换为场景坐标，然后在附近随机采样
+                let u = (i as f64 + rng.gen_range(0.0..1.)) / (IMAGE_WIDTH - 1) as f64;
+                let v = (j as f64 + rng.gen_range(0.0..1.)) / (IMAGE_HEIGHT - 1) as f64;
+                let r = cam.get_ray(u, v);
+                pixel_color += ray_color(&r, &world);
+            }
+
+            write_color(&mut stdout(), &pixel_color, SAMPLE_PER_PIXEL)?;
         }
     }
     eprintln!("\nDone");

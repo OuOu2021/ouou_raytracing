@@ -66,6 +66,9 @@ impl Vec3 {
             ],
         }
     }
+    pub const fn to_tuple(&self) -> (f64, f64, f64) {
+        (self.e[0], self.e[1], self.e[2])
+    }
 }
 
 impl Add for Vec3 {
@@ -219,8 +222,22 @@ impl Color {
     pub const fn blue() -> Self {
         Color(Vec3::new(0., 0., 1.))
     }
+    pub const fn black() -> Self {
+        Color(Vec3::new(0., 0., 0.))
+    }
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Color(Vec3::new(x, y, z))
+    }
+    pub const fn to_tuple(&self) -> (f64, f64, f64) {
+        (self.0.e[0], self.0.e[1], self.0.e[2])
+    }
+}
+
+impl AddAssign for Color {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0[0] += rhs.0[0];
+        self.0[1] += rhs.0[1];
+        self.0[2] += rhs.0[2];
     }
 }
 

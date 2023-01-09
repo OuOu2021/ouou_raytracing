@@ -1,15 +1,15 @@
-use crate::{vec3::*, hittable::*};
-pub struct Sphere{
+use crate::{hittable::*, vec3::*};
+pub struct Sphere {
     center: Point3,
-    radius: f64
+    radius: f64,
 }
 
-impl Sphere{
-    pub fn new(center: Point3, radius: f64) -> Self{
-        Self{center,radius}
+impl Sphere {
+    pub fn new(center: Point3, radius: f64) -> Self {
+        Self { center, radius }
     }
 }
-impl Hittable for Sphere{
+impl Hittable for Sphere {
     fn hit(&self, ray: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
         //光源指向球心
         let oc = ray.origin() - self.center;
@@ -20,10 +20,10 @@ impl Hittable for Sphere{
         if delta < 0. {
             None
         } else {
-            let mut root = (-half_b - delta.sqrt())/a;
+            let mut root = (-half_b - delta.sqrt()) / a;
             if !t_range.contains(&root) {
-                root = (-half_b + delta.sqrt())/a;
-                if !t_range.contains(&root){
+                root = (-half_b + delta.sqrt()) / a;
+                if !t_range.contains(&root) {
                     return None;
                 }
             }

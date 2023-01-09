@@ -1,11 +1,12 @@
 use std::error::Error;
 
+pub mod camera;
 pub mod color;
-pub mod ray;
-pub mod vec3;
 pub mod hittable;
-pub mod sphere;
 pub mod hittable_list;
-mod utility;
+pub mod ray;
+pub mod sphere;
+pub mod utility;
+pub mod vec3;
 
 pub type MyResult = Result<(), Box<dyn Error>>;
