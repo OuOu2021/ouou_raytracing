@@ -1,6 +1,9 @@
+use rand::*;
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{
+        Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
+    },
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -68,6 +71,27 @@ impl Vec3 {
     }
     pub const fn to_tuple(&self) -> (f64, f64, f64) {
         (self.e[0], self.e[1], self.e[2])
+    }
+    pub fn random(rg: Range<f64>) -> Self {
+        let mut rng = rand::thread_rng();
+        Self {
+            e: [
+                rng.gen_range(rg.clone()),
+                rng.gen_range(rg.clone()),
+                rng.gen_range(rg.clone()),
+            ],
+        }
+    }
+    pub fn random_in_sphere(r: f64) -> Self {
+        let mut rng = rand::thread_rng();
+        loop {
+            let tmp = Self::random(-r..r);
+            if tmp.len_squared() >= r * r {
+                continue;
+            } else {
+                return tmp;
+            }
+        }
     }
 }
 
@@ -233,6 +257,20 @@ impl Color {
     }
 }
 
+impl Mul<f64> for Color {
+    type Output = Color;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Color(self.0 * rhs)
+    }
+}
+impl Mul<Color> for f64 {
+    type Output = Color;
+
+    fn mul(self, rhs: Color) -> Self::Output {
+        Color(self * rhs.0)
+    }
+}
 impl AddAssign for Color {
     fn add_assign(&mut self, rhs: Self) {
         self.0[0] += rhs.0[0];

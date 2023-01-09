@@ -2,10 +2,7 @@ use ouou_raytracing::{
     camera::Camera, color::*, hittable::*, hittable_list::*, ray::Ray, sphere::Sphere, utility::*,
     vec3::*, MyResult,
 };
-use std::{
-    f64::INFINITY,
-    io::{stdout},
-};
+use std::{f64::INFINITY, io::stdout};
 
 /* 弃用
 fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
@@ -24,11 +21,16 @@ fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
 */
 
 /// 接受光线，计算光线打在视口上的颜色
-fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
+    if depth <= 0 {
+        return Color::black();
+    }
     //返回交点t值，也就能算出交点坐标
     let t = world.hit(&r, &(0.0..INFINITY));
-    if let Some(tt) = t {
-        Color(0.5 * (tt.normal + Color::new(1., 1., 1.).0))
+    if let Some(rec) = t {
+        let target = rec.p.0 + rec.normal + Vec3::random_in_sphere(1.);
+        //Color(0.5 * (rec.normal + Color::new(1., 1., 1.).0))
+        0.5 * ray_color(&Ray::new(rec.p, target-rec.p.0), world, depth - 1)
     } else {
         // 标准化
         let unit_direction = r.direction().to_unit();
@@ -50,6 +52,7 @@ fn main() -> MyResult {
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize; //225
     const SAMPLE_PER_PIXEL: u32 = 100;
+    const MAX_DEPTH: u32 = 10;
 
     // World
     let mut world = HittableList::new();
@@ -74,7 +77,7 @@ fn main() -> MyResult {
                 let u = (i as f64 + rng.gen_range(0.0..1.)) / (IMAGE_WIDTH - 1) as f64;
                 let v = (j as f64 + rng.gen_range(0.0..1.)) / (IMAGE_HEIGHT - 1) as f64;
                 let r = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world);
+                pixel_color += ray_color(&r, &world, MAX_DEPTH);
             }
 
             write_color(&mut stdout(), &pixel_color, SAMPLE_PER_PIXEL)?;

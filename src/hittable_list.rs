@@ -1,7 +1,4 @@
-use crate::{
-    hittable::*,
-    ray::Ray,
-};
+use crate::{hittable::*, ray::Ray};
 
 pub struct HittableList {
     objects: Vec<Box<dyn Hittable>>,
