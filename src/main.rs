@@ -4,7 +4,10 @@ use ouou_raytracing::{
 };
 //use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 //use rayon::prelude::*;
-use std::{time::SystemTime,{f64::INFINITY, io::stdout}};
+use std::{
+    time::SystemTime,
+    {f64::INFINITY, io::stdout},
+};
 
 /* 弃用
 fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
@@ -28,11 +31,11 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
         return Color::black();
     }
     //返回交点t值，也就能算出交点坐标
-    let t = world.hit(&r, &( 0.001..INFINITY));
+    let t = world.hit(&r, &(0.001..INFINITY));
     if let Some(rec) = t {
         let target = rec.p.0 + rec.normal + Vec3::random_in_sphere(1.);
         //Color(0.5 * (rec.normal + Color::new(1., 1., 1.).0))
-        0.5 * ray_color(&Ray::new(rec.p, target-rec.p.0), world, depth - 1)
+        0.5 * ray_color(&Ray::new(rec.p, target - rec.p.0), world, depth - 1)
     } else {
         // 标准化
         let unit_direction = r.direction().to_unit();
@@ -69,25 +72,34 @@ fn main() -> MyResult {
     // Render
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
 
-    (0..IMAGE_HEIGHT).into_iter().rev().for_each(|j|{
+    (0..IMAGE_HEIGHT).into_iter().rev().for_each(|j| {
         if j % 10 == 0 {
             eprintln!("\rScanlines remaining: {j} ");
         }
         (0..IMAGE_WIDTH).into_iter().for_each(|i| {
-            let pixel_color = (0..SAMPLE_PER_PIXEL).into_iter().map(|_|{
-                let mut rng_tmp = thread_rng();
-                //将像素坐标转换为场景坐标，然后在附近随机采样
-                //gen方法默认就是生成[0,1)的浮点数
-                let u = (i as f64 + rng_tmp.gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
-                let v = (j as f64 + rng_tmp.gen::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
-                let r = cam.get_ray(u, v);
-                ray_color(&r, &world, MAX_DEPTH)
-            }).sum();
+            let pixel_color = (0..SAMPLE_PER_PIXEL)
+                .into_iter()
+                .map(|_| {
+                    let mut rng_tmp = thread_rng();
+                    //将像素坐标转换为场景坐标，然后在附近随机采样
+                    //gen方法默认就是生成[0,1)的浮点数
+                    let u = (i as f64 + rng_tmp.gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
+                    let v = (j as f64 + rng_tmp.gen::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
+                    let r = cam.get_ray(u, v);
+                    ray_color(&r, &world, MAX_DEPTH)
+                })
+                .sum();
             write_color(&mut stdout(), &pixel_color, SAMPLE_PER_PIXEL).expect("写入失败");
         });
     });
     eprintln!("\nDone");
     let finish_time = SystemTime::now();
-    eprintln!("time cost: {:.2} seconds", finish_time.duration_since(start_time).unwrap().as_secs_f64());
+    eprintln!(
+        "time cost: {:.2} seconds",
+        finish_time
+            .duration_since(start_time)
+            .unwrap()
+            .as_secs_f64()
+    );
     Ok(())
 }

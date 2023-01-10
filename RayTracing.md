@@ -1,6 +1,6 @@
 # Ray Tracing in One Week Notes
 [the book](https://raytracing.github.io/)
-[Ray Tracing in One Weekend 超详解](https://www.cnblogs.com/lv-anchoret/p/10163205.html)
+[Ray Tracing in One Weekend 超详解](https://www.cnblogs.com/lv-anchoret)
 用Rust实现，记录对the book的学习理解进程，与对Rust特性的学习探索有感
 
 ## Output an Image
@@ -127,9 +127,24 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 漫反射(无光泽)材质特性：
 * 不是像镜面反射一样只呈现出周围环境的颜色，而是用自己固有的颜色来调节这种颜色
 * 对光线吸收率较高，显得较暗
-* 只要反射光线方向随机就能实现漫反射效果。其中一种最简单的是理想漫反射表面模型(ideal diffuse surfaces)，它是`Lambertian`反射(理想散射)模型的简化实现(simple hack)
-  * Lambertian表面是指在一个固定的照明分布下从所有的视场方向上观测都具有相同亮度的表面，Lambertian表面不吸收任何入射光．Lambertian反射也叫散光反射，不管照明分布如何，Lambertian表面在所有的表面方向上接收并发散所有的入射照明，结果是每一个方向上都能看到相同数量的能量．
+* 只要反射光线方向随机就能实现漫反射效果。
+ 
+先实现最简单的理想漫反射表面模型(ideal diffuse surfaces)，它是`Lambertian`反射(理想散射)模型的简化实现(simple hack,inaccurate)
+* Lambertian表面是指在一个固定的照明分布下从所有的视场方向上观测都具有相同亮度的表面，Lambertian表面不吸收任何入射光．Lambertian反射也叫散光反射，不管照明分布如何，Lambertian表面在所有的表面方向上接收并发散所有的入射照明，结果是每一个方向上都能看到相同数量的能量．
 
+![](imgs/2023-01-10-22-30-41.png)
+在法向量长度为半径，光线与物体交点+法向量为球心的球上随机取点，生成反射光线
+
+反射光线使`ray_color`变为了递归函数，不射到任何物体才会结束递归。所以此外我们还需要限制递归的最大层数
+
+#### 用伽马矫正精确的颜色强度
+>[优秀参考资料：到底什么是伽马校正 Gamma Correction?](https://zhuanlan.zhihu.com/p/33637724)
+>[简易资料：伽马矫正与LUT](https://blog.csdn.net/dx199771/article/details/111504446)
+
+显示器都假设图像是经过伽马矫正的，所以我们也需要将原始图像进行伽马矫正来得到正常的显示效果。我们选择简易的`gamma 2`,只需对原始颜色(`[0,1)`)开平方根，再映射到`[0,255]`即可
+
+#### Fixing Shadow Acne
+为了消除阴影的毛刺，需要忽略t十分接近0的射线
 
 
 

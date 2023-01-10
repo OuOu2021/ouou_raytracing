@@ -20,12 +20,9 @@ impl HittableList {
 
 impl Hittable for HittableList {
     fn hit(&self, ray: &Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
-        let mut ans = self
-            .objects
+        self.objects
             .iter()
             .filter_map(|x| x.hit(&ray, &t_range))
-            .collect::<Vec<_>>();
-        ans.sort_by(|x, y| x.t.partial_cmp(&y.t).expect("无法比较"));
-        ans.into_iter().next()
+            .min_by(|x, y| x.t.partial_cmp(&y.t).expect("无法比较"))
     }
 }
