@@ -33,7 +33,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
     //返回交点t值，也就能算出交点坐标
     let t = world.hit(&r, &(0.001..INFINITY));
     if let Some(rec) = t {
-        let target = rec.p.0 + rec.normal + Vec3::random_in_sphere(1.);
+        let target = rec.p.0 + rec.normal + Vec3::random_unit(1.);
         //Color(0.5 * (rec.normal + Color::new(1., 1., 1.).0))
         0.5 * ray_color(&Ray::new(rec.p, target - rec.p.0), world, depth - 1)
     } else {

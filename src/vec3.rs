@@ -93,6 +93,9 @@ impl Vec3 {
             }
         }
     }
+    pub fn random_unit(r: f64) -> Self {
+        Self::random_in_sphere(r).to_unit()
+    }
 }
 
 impl Add for Vec3 {
