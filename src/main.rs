@@ -2,8 +2,9 @@ use ouou_raytracing::{
     camera::Camera, color::*, hittable::*, hittable_list::*, ray::Ray, sphere::Sphere, utility::*,
     vec3::*, MyResult,
 };
+//use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 //use rayon::prelude::*;
-use std::{f64::INFINITY, io::stdout};
+use std::{time::SystemTime,{f64::INFINITY, io::stdout}};
 
 /* 弃用
 fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
@@ -45,7 +46,8 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
 }
 fn main() -> MyResult {
     // 初始化
-    let mut rng = thread_rng();
+    let mut _rng = thread_rng();
+    let start_time = SystemTime::now();
 
     // Image
     // 横纵比
@@ -72,18 +74,20 @@ fn main() -> MyResult {
             eprintln!("\rScanlines remaining: {j} ");
         }
         (0..IMAGE_WIDTH).into_iter().for_each(|i| {
-            let mut pixel_color = Color::black();
-            for _ in 0..SAMPLE_PER_PIXEL {
-                //let mut rng_tmp = thread_rng();
+            let pixel_color = (0..SAMPLE_PER_PIXEL).into_iter().map(|_|{
+                let mut rng_tmp = thread_rng();
                 //将像素坐标转换为场景坐标，然后在附近随机采样
-                let u = (i as f64 + rng.gen_range(0.0..1.)) / (IMAGE_WIDTH - 1) as f64;
-                let v = (j as f64 + rng.gen_range(0.0..1.)) / (IMAGE_HEIGHT - 1) as f64;
+                //gen方法默认就是生成[0,1)的浮点数
+                let u = (i as f64 + rng_tmp.gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
+                let v = (j as f64 + rng_tmp.gen::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
                 let r = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world, MAX_DEPTH);
-            }
+                ray_color(&r, &world, MAX_DEPTH)
+            }).sum();
             write_color(&mut stdout(), &pixel_color, SAMPLE_PER_PIXEL).expect("写入失败");
         });
     });
     eprintln!("\nDone");
+    let finish_time = SystemTime::now();
+    eprintln!("time cost: {:.2} seconds", finish_time.duration_since(start_time).unwrap().as_secs_f64());
     Ok(())
 }

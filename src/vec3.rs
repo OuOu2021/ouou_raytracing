@@ -3,7 +3,7 @@ use std::{
     fmt::Display,
     ops::{
         Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
-    },
+    }, iter::Sum,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -275,6 +275,25 @@ impl AddAssign for Color {
         self.0[0] += rhs.0[0];
         self.0[1] += rhs.0[1];
         self.0[2] += rhs.0[2];
+    }
+}
+impl Add for Color{
+    type Output = Color;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Color(Vec3::new(self.0[0]+rhs.0[0],
+            self.0[1]+rhs.0[1],
+            self.0[2]+rhs.0[2]
+        ))
+    }
+}
+impl Sum for Color{
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Color(Vec3::zero()),|a,b| Color(Vec3::new(
+            a.0[0]+b.0[0],
+            a.0[1]+b.0[1],
+            a.0[2]+b.0[2],
+        )))
     }
 }
 
