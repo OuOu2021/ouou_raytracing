@@ -2,6 +2,7 @@ use ouou_raytracing::{
     camera::Camera, color::*, hittable::*, hittable_list::*, ray::Ray, sphere::Sphere, utility::*,
     vec3::*, MyResult,
 };
+//use rayon::prelude::*;
 use std::{f64::INFINITY, io::stdout};
 
 /* 弃用
@@ -26,7 +27,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
         return Color::black();
     }
     //返回交点t值，也就能算出交点坐标
-    let t = world.hit(&r, &(0.0..INFINITY));
+    let t = world.hit(&r, &( 0.001..INFINITY));
     if let Some(rec) = t {
         let target = rec.p.0 + rec.normal + Vec3::random_in_sphere(1.);
         //Color(0.5 * (rec.normal + Color::new(1., 1., 1.).0))
@@ -66,23 +67,23 @@ fn main() -> MyResult {
     // Render
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
 
-    for j in (0..IMAGE_HEIGHT).rev() {
+    (0..IMAGE_HEIGHT).into_iter().rev().for_each(|j|{
         if j % 10 == 0 {
             eprintln!("\rScanlines remaining: {j} ");
         }
-        for i in 0..IMAGE_WIDTH {
+        (0..IMAGE_WIDTH).into_iter().for_each(|i| {
             let mut pixel_color = Color::black();
             for _ in 0..SAMPLE_PER_PIXEL {
+                //let mut rng_tmp = thread_rng();
                 //将像素坐标转换为场景坐标，然后在附近随机采样
                 let u = (i as f64 + rng.gen_range(0.0..1.)) / (IMAGE_WIDTH - 1) as f64;
                 let v = (j as f64 + rng.gen_range(0.0..1.)) / (IMAGE_HEIGHT - 1) as f64;
                 let r = cam.get_ray(u, v);
                 pixel_color += ray_color(&r, &world, MAX_DEPTH);
             }
-
-            write_color(&mut stdout(), &pixel_color, SAMPLE_PER_PIXEL)?;
-        }
-    }
+            write_color(&mut stdout(), &pixel_color, SAMPLE_PER_PIXEL).expect("写入失败");
+        });
+    });
     eprintln!("\nDone");
     Ok(())
 }

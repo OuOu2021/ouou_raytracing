@@ -83,7 +83,6 @@ impl Vec3 {
         }
     }
     pub fn random_in_sphere(r: f64) -> Self {
-        let mut rng = rand::thread_rng();
         loop {
             let tmp = Self::random(-r..r);
             if tmp.len_squared() >= r * r {
