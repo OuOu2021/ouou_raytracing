@@ -96,6 +96,13 @@ impl Vec3 {
     pub fn random_unit(r: f64) -> Self {
         Self::random_in_sphere(r).to_unit()
     }
+    pub fn near_zero(&self) -> bool {
+        const EPS: f64 = 1e-8;
+        self.e.iter().all(|&x| x.abs() < EPS)
+    }
+    pub fn reflect(&self, normal: Vec3) -> Vec3 {
+        *self - 2. * self.dot_mul(normal) * normal
+    }
 }
 
 impl Add for Vec3 {
@@ -136,17 +143,6 @@ impl SubAssign for Vec3 {
     }
 }
 
-impl Mul for Vec3 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.e[0] * rhs.e[0],
-            self.e[1] * rhs.e[1],
-            self.e[2] * rhs.e[2],
-        )
-    }
-}
 impl Mul<&Vec3> for f64 {
     type Output = Vec3;
 
@@ -297,6 +293,17 @@ impl Sum for Color {
         iter.fold(Color(Vec3::zero()), |a, b| {
             Color(Vec3::new(a.0[0] + b.0[0], a.0[1] + b.0[1], a.0[2] + b.0[2]))
         })
+    }
+}
+impl Mul for Color {
+    type Output = Color;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Color(Vec3::new(
+            self.0[0] * rhs.0[0],
+            self.0[1] * rhs.0[1],
+            self.0[2] * rhs.0[2],
+        ))
     }
 }
 

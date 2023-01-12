@@ -1,7 +1,12 @@
 # Ray Tracing in One Week Notes
+用Rust实现，记录对the book的学习理解进程，与对Rust特性的学习探索有感
+
+## References
 [the book](https://raytracing.github.io/)
 [Ray Tracing in One Weekend 超详解](https://www.cnblogs.com/lv-anchoret)
-用Rust实现，记录对the book的学习理解进程，与对Rust特性的学习探索有感
+[光追资料收集](https://www.bilibili.com/read/cv2317592/)
+[总结《Ray Tracing from the Ground Up》](https://blog.csdn.net/libing_zeng/article/details/72625390)
+[光栅渲染器学习总结博客](https://zhuanlan.zhihu.com/p/141210744)
 
 ## Output an Image
 了解PPM格式
@@ -156,3 +161,36 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 这两种变化都是由于光线的散射更加均匀，更少的光线向法线散射。
 * 对于漫反射的物体，它们会显得更浅，这是因为有更多的光反射到相机上。
 * 对于阴影，向上反射的光线较少，因此正处于较小球体下方的大球部分更亮。
+
+### 金属材质&镜面反射 Mirrored Light Reflection
+#### 对材料的抽象
+材料可以选择和具体物体绑定，也可以不绑定。这里就不绑定了，而是物体持有材质的`Rc`智能指针
+
+材料需要处理两个问题：
+1. 如何创造反射/散射光(即如何吸收、转化入射光)
+2. 光线衰减量如何
+
+diffuse:
+1. 视线与物体表面产生撞击点p，在p处相切单位圆内随机找一点s，散射光方向即p->s
+2. 光线强度衰减一半(Color直接乘0.5，红绿蓝同时减少一半，相当于只减小光强不改变颜色，最后呈中性灰色)
+
+metal:
+1. 镜面反射，根据反射定律，由入射光直接确定反射光方向
+2. 红绿蓝衰减程度不同，使不同金属呈现不同颜色。用参数自由确定
+
+![](imgs/2023-01-11-23-23-22.png)
+由于我们的法向量是单位向量，所以$|\vec b| = \vec v * \vec n$
+公式: 出射光线$\vec o = \vec v - 2\vec n \times (\vec v\cdot \vec n)$
+
+##### 实现细节
+实现了`Material trait`的`struct`是一种材料，它的`scatter`方法可以通过`入射光`与`HitRecord`确定出射光与其颜色。通过前述方法分别实现`Lambertian`与`Matel`
+
+问题：漫反射抽象时可能产生的反射光与法线接近反向，加起来接近0导致`NaN`或者`Inf`
+解决方案：特判接近零的情况，返回法线方向
+
+物体与`HitRecord`都持有材质的共享型智能指针
+
+修复之前`impl Mul<Vec3> for Vec3`的严重bug
+
+#### Fuzzy Reflection 模糊反射
+对镜面反射出射方向进行少量的随机扰动，获得模糊反射效果

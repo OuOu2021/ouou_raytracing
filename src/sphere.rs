@@ -1,20 +1,27 @@
-use crate::{hittable::*, vec3::*};
+use std::rc::Rc;
+
+use crate::{hittable::*, material::Material, vec3::*};
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64) -> Self {
-        Self { center, radius }
+    pub fn new(center: Point3, radius: f64, material: &Rc<dyn Material>) -> Self {
+        Self {
+            center,
+            radius,
+            material: Rc::clone(material),
+        }
     }
 }
 impl Hittable for Sphere {
-    fn hit(&self, ray: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
+    fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
         //光源指向球心
-        let oc = ray.origin() - self.center;
-        let a = ray.direction().len_squared();
-        let half_b = oc.dot_mul(ray.direction());
+        let oc = ray_in.origin() - self.center;
+        let a = ray_in.direction().len_squared();
+        let half_b = oc.dot_mul(ray_in.direction());
         let c = oc.len_squared() - self.radius * self.radius;
         let delta = half_b * half_b - a * c;
         if delta < 0. {
@@ -28,10 +35,10 @@ impl Hittable for Sphere {
                 }
             }
             let t = root;
-            let p = ray.at(t);
+            let p = ray_in.at(t);
             let outward_normal = (p - self.center) / self.radius;
-            let mut ans = HitRecord::new(p, outward_normal, t);
-            ans.set_face_normal(&ray, outward_normal);
+            let mut ans = HitRecord::new(p, outward_normal, t, &self.material);
+            ans.set_face_normal(&ray_in, outward_normal);
             Some(ans)
         }
     }

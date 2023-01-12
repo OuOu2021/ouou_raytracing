@@ -1,10 +1,19 @@
 use ouou_raytracing::{
-    camera::Camera, color::*, hittable::*, hittable_list::*, ray::Ray, sphere::Sphere, utility::*,
-    vec3::*, MyResult,
+    camera::Camera,
+    color::*,
+    hittable::*,
+    hittable_list::*,
+    material::{Lambertian, Material, Metal},
+    ray::Ray,
+    sphere::Sphere,
+    utility::*,
+    vec3::*,
+    MyResult,
 };
 //use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 //use rayon::prelude::*;
 use std::{
+    rc::Rc,
     time::SystemTime,
     {f64::INFINITY, io::stdout},
 };
@@ -26,25 +35,27 @@ fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
 */
 
 /// 接受光线，计算光线打在视口上的颜色
-fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
+fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
     if depth <= 0 {
         return Color::black();
     }
     //返回交点t值，也就能算出交点坐标
-    let t = world.hit(&r, &(0.001..INFINITY));
+    let t = world.hit(&r_in, &(0.001..INFINITY));
     if let Some(rec) = t {
-        let target = rec.p.0 + rec.normal + Vec3::random_unit(1.);
-        //Color(0.5 * (rec.normal + Color::new(1., 1., 1.).0))
-        0.5 * ray_color(&Ray::new(rec.p, target - rec.p.0), world, depth - 1)
+        if let Some((scattered, attenuation)) = rec.material.scatter(r_in, &rec) {
+            attenuation * ray_color(&scattered, world, depth - 1)
+        } else {
+            Color::black()
+        }
     } else {
         // 标准化
-        let unit_direction = r.direction().to_unit();
+        let unit_direction = r_in.direction().to_unit();
 
         // 把y作为t来线性混合，同时确保t是正数所以做了这么个转换
         let t = 0.5 * (unit_direction.get_y() + 1.0);
 
         // Blend 公式 天蓝色和白色混合，其实就是二维线性插值
-        Color((1. - t) * Color(Vec3::new(1., 1., 1.)).0 + t * Color(Vec3::new(0.5, 0.7, 1.)).0)
+        (1. - t) * Color(Vec3::new(1., 1., 1.)) + t * Color(Vec3::new(0.5, 0.7, 1.))
     }
 }
 fn main() -> MyResult {
@@ -63,8 +74,31 @@ fn main() -> MyResult {
     // World
     let mut world = HittableList::new();
 
-    world.add(Box::new(Sphere::new(Point3::new(0., 0., -1.), 0.5)));
-    world.add(Box::new(Sphere::new(Point3::new(0., -100.5, -1.), 100.)));
+    let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let material_center = Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
+    let material_left = Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8)));
+    let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2)));
+
+    world.add(Box::new(Sphere::new(
+        Point3::new(0., -100.5, -1.),
+        100.,
+        &(material_ground as Rc<dyn Material>),
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(0., 0., -1.),
+        0.5,
+        &(material_center as Rc<dyn Material>),
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(-1., 0., -1.),
+        0.5,
+        &(material_left as Rc<dyn Material>),
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(1., 0., -1.),
+        0.5,
+        &(material_right as Rc<dyn Material>),
+    )));
 
     // Camera
     let cam = Camera::default();
