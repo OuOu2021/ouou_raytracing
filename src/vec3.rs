@@ -103,6 +103,16 @@ impl Vec3 {
     pub fn reflect(&self, normal: Vec3) -> Vec3 {
         *self - 2. * self.dot_mul(normal) * normal
     }
+    pub fn refract(
+        &self,
+        normal: Vec3,
+        etai_over_etat: f64, /*折射率之比，入:出 */
+    ) -> Vec3 {
+        let cos_theta_1 = -self.dot_mul(normal).min(1.0);
+        let r_out_perp/*垂直分量 */ = etai_over_etat * (*self + cos_theta_1*normal);
+        let r_out_parallel/*平行分量 */ = -(1.0- r_out_perp.len_squared()).abs().sqrt() * normal;
+        r_out_perp + r_out_parallel
+    }
 }
 
 impl Add for Vec3 {
@@ -150,7 +160,7 @@ impl Mul<&Vec3> for f64 {
         Vec3::new(rhs.e[0] * self, rhs.e[1] * self, rhs.e[2] * self)
     }
 }
-//Dot Multiply
+
 impl Mul<Vec3> for f64 {
     type Output = Vec3;
 

@@ -4,7 +4,12 @@
 ## References
 [the book](https://raytracing.github.io/)
 [Ray Tracing in One Weekend 超详解](https://www.cnblogs.com/lv-anchoret)
+[难点总结](https://blog.csdn.net/qq_41655612/article/details/127645259)
+[用CUDA进行GPU加速计算](https://zhuanlan.zhihu.com/p/481545755)
+[用CUDA进行GPU加速计算 英文原文](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/)
 [光追资料收集](https://www.bilibili.com/read/cv2317592/)
+[计算机图形学入门资料合集](https://blog.csdn.net/weixin_31226805/article/details/111969351?ops_request_misc=&request_id=&biz_id=102&utm_term=Ray%20Tracing%20in%20one%20weekend%20CUD&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-5-111969351.142^v70^wechat_v2,201^v4^add_ask)
+[从光线追踪到路径追踪](https://zhuanlan.zhihu.com/p/138317358)
 [总结《Ray Tracing from the Ground Up》](https://blog.csdn.net/libing_zeng/article/details/72625390)
 [光栅渲染器学习总结博客](https://zhuanlan.zhihu.com/p/141210744)
 
@@ -149,7 +154,7 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 显示器都假设图像是经过伽马矫正的，所以我们也需要将原始图像进行伽马矫正来得到正常的显示效果。我们选择简易的`gamma 2`,只需对原始颜色(`[0,1)`)开平方根，再映射到`[0,255]`即可
 
 #### Fixing Shadow Acne
-为了消除阴影的毛刺，需要忽略t十分接近0的射线
+为了消除阴影的毛刺，需要忽略t十分接近0(与自己相交)的射线
 
 #### 真正的Lambertian Reflection
 实现上的区别只是把在球中生成的随机向量单位化了，但具体原理没懂
@@ -193,4 +198,36 @@ metal:
 修复之前`impl Mul<Vec3> for Vec3`的严重bug
 
 #### Fuzzy Reflection 模糊反射
-对镜面反射出射方向进行少量的随机扰动，获得模糊反射效果
+现实的金属很难做到像镜子一样精准地反光，而是有一定的模糊效果。对镜面反射出射方向进行少量的随机扰动，获得模糊反射效果
+
+### Dielectrics & Refraction
+Dielectrics：电介质，如空气、玻璃、水、钻石。
+
+对于光(属于电磁波)来说，传播不需要任何介质，所以在真空里也可以传播。
+
+在不同电介质中的传播与真空中传播有所不同，如：
+* 在越稀疏的介质中传播速度越快
+* 从一种介质斜射入另一种介质时，由于惠更斯原理/光和物质间的相互作用力(近代物理)，会在交界处发生偏折，传播方向改变，这种现象即为折射(Refraction)
+
+光击中电介质表面时既会折射进入介质，又会反射而离开介质，但我们的一束光线只能选择其一，所以我们随机选择折射或反射之一作为散射方式，经过多次取样的平均，最终效果相同
+
+#### 折射
+斯涅尔定律(Snell's Law，折射定律)：$$\eta_1\sin \theta_1 = \eta_2\sin \theta_2$$ 其中$\theta_1$为入射角，$\theta_2$为折射角，$\eta_1$ $\eta_2$分别是两种介质的折射率($\geq 1$)
+![](imgs/2023-01-12-12-46-33.png)
+玻璃1.3~1.7，钻石2.4
+
+计算折射角：$$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
+
+首先入射光、法线、折射光、(反射光)都在一个平面内。我们可以在平面上将折射光`R'`分解成两个垂直的部分来计算 $$\vec R'=\vec {R'_\perp}+\vec {R'_\parallel}$$
+
+可以解出 $$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+\cos \theta_1 \vec n),$$$$\vec {R'_\parallel} = - \sqrt{1- |\vec {R'_\perp}|^2}\vec n,$$
+
+其中$\cos \theta = \frac {\vec a \cdot \vec b} {|\vec a| |\vec b|}$，可将公式化为
+
+$$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+(-\vec R \cdot \vec n)\vec n)$$
+
+#### 全反射
+全反射与临界角：折射率太大会导致Snell's Law没有实根，即没有折射可能，只会反射，这就是全反射。折射角公式：
+$$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
+公式中如果$\eta_1=1.5, \eta_2=1.0, \sin \theta_1>\frac 2 3$时$\sin \theta_1>1$，折射角无解,发生全反射
+
