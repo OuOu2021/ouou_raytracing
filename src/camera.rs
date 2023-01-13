@@ -38,4 +38,24 @@ impl Camera {
             self.lower_left_corner.0 + u * self.horizontal + v * self.vertical - self.origin.0,
         )
     }
+
+    pub fn new(vfov: f64 /*vertical field-of-view in degrees*/, aspect_ratio: f64) -> Self {
+        let theta = vfov.to_radians();
+        let h = (theta / 2.).tan();
+        let viewport_height = 2.0 * h;
+        let viewport_width = aspect_ratio * viewport_height;
+        let focal_length = 1.;
+        let origin = Point3(Vec3::new(0., 0., 0.));
+        let horizontal = Vec3::new(viewport_width, 0., 0.);
+        let vertical = Vec3::new(0., viewport_height, 0.);
+
+        Self {
+            origin,
+            horizontal,
+            vertical,
+            lower_left_corner: Point3(
+                origin.0 - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., focal_length),
+            ),
+        }
+    }
 }

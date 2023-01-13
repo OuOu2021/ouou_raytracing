@@ -79,7 +79,7 @@ impl Dielectric {
 }
 impl Material for Dielectric {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
-        let attenuation = Color::new(1.0, 1.0, 1.0);
+        let attenuation = Color::new(0.98, 0.98, 0.98);
         let refraction_ratio = if let Some(a) = rec.front_face {
             if a {
                 1.0 / self.ir

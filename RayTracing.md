@@ -239,3 +239,18 @@ There is a big ugly equation for that, but almost everybody uses a cheap and sur
 #### 建模空心玻璃球
 电介质的一个有意思且简单的花样就是空心玻璃球，如果半径为负数，球的空间范围没有改变，但表面的法向量反向了，这可以用来在球里打一个空气泡。
 
+### Positionable Camera
+让相机可以移动、旋转、缩放
+
+相机和电介质都很难调试(确实)。所以应当渐进式地开发。先允许视野/视场角(FOV,Field of View)可以调节；再开发位移和旋转。
+
+FOV横向和纵向不同，以横向为基准，纵向对横向乘一个洗漱。
+
+#### Camera Viewing Geometry
+先让相机对准z轴负方向，h作为向量与z轴的距离
+
+![](imgs/2023-01-13-19-18-32.png)
+(图片不够直观，$\theta$视场角是两倍与z轴的夹角，所以计算tan要除以2,$h = \tan {(\frac \theta 2)}$)
+
+
+
