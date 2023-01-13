@@ -231,3 +231,11 @@ $$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+(-\vec R \cdot \vec n)\vec n)$$
 $$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
 公式中如果$\eta_1=1.5, \eta_2=1.0, \sin \theta_1>\frac 2 3$时$\sin \theta_1>1$，折射角无解,发生全反射
 
+#### Schlick Approximation
+现在我们的电介质要么只折射光线，要么只全反射光线。实际上的电介质根据入射角度会有不同的折射与反射比例，而不是二者只择其一。
+
+There is a big ugly equation for that, but almost everybody uses a cheap and surprisingly accurate polynomial approximation by Christophe Schlick. 
+
+#### 建模空心玻璃球
+电介质的一个有意思且简单的花样就是空心玻璃球，如果半径为负数，球的空间范围没有改变，但表面的法向量反向了，这可以用来在球里打一个空气泡。
+
