@@ -8,8 +8,13 @@ pub struct Camera {
     lower_left_corner: Point3,
     horizontal: Vec3,
     vertical: Vec3,
+    lens_radius: f64,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
 }
 
+/*
 impl Default for Camera {
     fn default() -> Self {
         const ASPECT_RATIO: f64 = 16. / 9.;
@@ -30,12 +35,18 @@ impl Default for Camera {
         }
     }
 }
+*/
 
 impl Camera {
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+        let random_disk = self.lens_radius * Vec3::random_in_unit_disk();
+        let offset = self.u * random_disk.get_x() + self.v * random_disk.get_y();
+
         Ray::new(
-            self.origin,
-            self.lower_left_corner.0 + u * self.horizontal + v * self.vertical - self.origin.0,
+            self.origin + offset,
+            self.lower_left_corner.0 + s * self.horizontal + t * self.vertical
+                - self.origin.0
+                - offset,
         )
     }
 
@@ -43,8 +54,12 @@ impl Camera {
         look_from: Point3,
         look_at: Point3,
         view_up: Vec3,
-        vfov: f64, /*vertical field-of-view in degrees*/
+        // vertical field-of-view in degrees
+        vfov: f64,
         aspect_ratio: f64,
+        aperture: f64,
+        // distance from focus plane
+        focus_dist: f64,
     ) -> Self {
         let theta = vfov.to_radians();
         let h = (theta / 2.).tan();
@@ -57,15 +72,20 @@ impl Camera {
 
         //let focal_length = 1.;
         let origin = look_from;
-        let horizontal = viewport_width * u;
-        let vertical = viewport_height * v;
-        let lower_left_corner = Point3(origin.0 - horizontal / 2. - vertical / 2. - w);
+        let horizontal = viewport_width * u * focus_dist;
+        let vertical = viewport_height * v * focus_dist;
+        let lower_left_corner = Point3(origin.0 - horizontal / 2. - vertical / 2. - w * focus_dist);
+        let lens_radius = aperture / 2.;
 
         Self {
             origin,
             horizontal,
             vertical,
             lower_left_corner,
+            u,
+            v,
+            w,
+            lens_radius,
         }
     }
 }

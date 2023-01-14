@@ -100,7 +100,7 @@ impl Vec3 {
         const EPS: f64 = 1e-8;
         self.e.iter().all(|&x| x.abs() < EPS)
     }
-    pub fn reflect(&self, normal: Vec3) -> Vec3 {
+    pub fn reflect(&self, normal: Vec3) -> Self {
         *self - 2. * self.dot_mul(normal) * normal
     }
     pub fn refract(
@@ -112,6 +112,20 @@ impl Vec3 {
         let r_out_perp/*垂直分量 */ = etai_over_etat * (*self + cos_theta_1*normal);
         let r_out_parallel/*平行分量 */ = -(1.0- r_out_perp.len_squared()).abs().sqrt() * normal;
         r_out_perp + r_out_parallel
+    }
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Vec3::new(
+                thread_rng().gen_range(-1.0..1.0),
+                thread_rng().gen_range(-1.0..1.0),
+                0.,
+            );
+            if p.len_squared() >= 1.0 {
+                continue;
+            } else {
+                return p;
+            }
+        }
     }
 }
 
@@ -323,6 +337,17 @@ impl Point3 {
     }
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Point3(Vec3::new(x, y, z))
+    }
+}
+impl Add<Vec3> for Point3 {
+    type Output = Point3;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        Point3(Vec3::new(
+            self.0[0] + rhs[0],
+            self.0[1] + rhs[1],
+            self.0[2] + rhs[2],
+        ))
     }
 }
 
