@@ -1,4 +1,4 @@
-use std::{ops::Range, rc::Rc};
+use std::ops::Range;
 
 use crate::{
     material::Material,
@@ -6,24 +6,24 @@ use crate::{
     vec3::{Point3, Vec3},
 };
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     // 交点
     pub p: Point3,
     // 法向量
     pub normal: Vec3,
     pub t: f64,
     pub front_face: Option<bool>,
-    pub material: Rc<dyn Material>,
+    pub material: &'a dyn Material,
 }
 
-impl HitRecord {
-    pub fn new(p: Point3, normal: Vec3, t: f64, material: &Rc<dyn Material>) -> Self {
+impl<'a> HitRecord<'a> {
+    pub fn new(p: Point3, normal: Vec3, t: f64, material: &'a dyn Material) -> Self {
         Self {
             p,
             normal,
             t,
             front_face: None,
-            material: Rc::clone(material),
+            material,
         }
     }
     pub fn set_face_normal(&mut self, ray_in: &Ray, outward_normal: Vec3) {

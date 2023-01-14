@@ -10,10 +10,10 @@ use ouou_raytracing::{
     vec3::*,
     MyResult,
 };
-//use rayon::prelude::{IntoParallelIterator, ParallelIterator};
-//use rayon::prelude::*;
+
+use rayon::prelude::*;
 use std::{
-    rc::Rc,
+    sync::Arc,
     time::SystemTime,
     {f64::INFINITY, io::stdout},
 };
@@ -58,72 +58,73 @@ fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
         (1. - t) * Color(Vec3::new(1., 1., 1.)) + t * Color(Vec3::new(0.5, 0.7, 1.))
     }
 }
+
 fn main() -> MyResult {
     // 初始化
+    eprintln!("Start Initializing");
     let mut _rng = thread_rng();
     let start_time = SystemTime::now();
     // Image
     // 横纵比
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 400;
+    const IMAGE_WIDTH: usize = 1280;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize; //225
-    const SAMPLE_PER_PIXEL: u32 = 100;
+    const SAMPLE_PER_PIXEL: u32 = 500;
     const MAX_DEPTH: u32 = 50;
 
     // World
-    let mut world = HittableList::new();
+    let world = random_scene();
 
-    let material_ground: Rc<dyn Material> = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let material_center: Rc<dyn Material> = Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-    let material_left: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
-    let material_right: Rc<dyn Material> = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.05));
-
-    world.add(Box::new(Sphere::new(
-        Point3::new(0.0, -100.5, -1.0),
-        100.,
-        &material_ground,
-    )));
-    world.add(Box::new(Sphere::new(
-        Point3::new(0.0, 0.0, -1.0),
-        0.5,
-        &material_center,
-    )));
-    world.add(Box::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.5,
-        &material_left,
-    )));
-
-    world.add(Box::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        -0.3,
-        &material_left,
-    )));
-
-    world.add(Box::new(Sphere::new(
-        Point3::new(1.0, 0.0, -1.0),
-        0.5,
-        &material_right,
-    )));
+    // let material_ground: Box<dyn Material> = Box::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    // let material_center: Box<dyn Material> = Box::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+    // let material_left: Box<dyn Material> = Box::new(Dielectric::new(1.5));
+    // let material_left_1: Box<dyn Material> = Box::new(Dielectric::new(1.5));
+    // let material_right: Box<dyn Material> = Box::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.05));
+    // world.add(Box::new(Sphere::new(
+    //     Point3::new(0.0, -100.5, -1.0),
+    //     100.,
+    //     material_ground,
+    // )));
+    // world.add(Box::new(Sphere::new(
+    //     Point3::new(0.0, 0.0, -1.0),
+    //     0.5,
+    //     material_center,
+    // )));
+    // world.add(Box::new(Sphere::new(
+    //     Point3::new(-1.0, 0.0, -1.0),
+    //     0.5,
+    //     material_left_1,
+    // )));
+    // world.add(Box::new(Sphere::new(
+    //     Point3::new(-1.0, 0.0, -1.0),
+    //     -0.3,
+    //     material_left,
+    // )));
+    // world.add(Box::new(Sphere::new(
+    //     Point3::new(1.0, 0.0, -1.0),
+    //     0.5,
+    //     material_right,
+    // )));
 
     // Camera
-    let look_from = Point3::new(-2., 1., 1.);
-    let look_at = Point3::new(0., 0., -1.);
+    let look_from = Point3::new(13., 2., 3.);
+    let look_at = Point3::new(0., 0., 0.);
     let vup = Vec3::new(0., 1., 0.);
-    let dist_to_focus = (look_from - look_at).len();
-    let aperture = 1.0;
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
 
     let cam = Camera::new(
         look_from,
         look_at,
         vup,
-        50.,
+        20.,
         ASPECT_RATIO,
         aperture,
         dist_to_focus,
     );
 
     // Render
+    eprintln!("Start Rendering");
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
 
     (0..IMAGE_HEIGHT).into_iter().rev().for_each(|j| {
@@ -132,13 +133,12 @@ fn main() -> MyResult {
         }
         (0..IMAGE_WIDTH).into_iter().for_each(|i| {
             let pixel_color = (0..SAMPLE_PER_PIXEL)
-                .into_iter()
+                .into_par_iter()
                 .map(|_| {
-                    let mut rng_tmp = thread_rng();
                     //将像素坐标转换为场景坐标，然后在附近随机采样
                     //gen方法默认就是生成[0,1)的浮点数
-                    let u = (i as f64 + rng_tmp.gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
-                    let v = (j as f64 + rng_tmp.gen::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
+                    let u = (i as f64 + thread_rng().gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
+                    let v = (j as f64 + random::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
                     let r = cam.get_ray(u, v);
                     ray_color(&r, &world, MAX_DEPTH)
                 })
@@ -156,4 +156,74 @@ fn main() -> MyResult {
             .as_secs_f64()
     );
     Ok(())
+}
+
+fn random_scene() -> HittableList {
+    let mut world = HittableList::new();
+    let ground_material = Box::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    world.add(Box::new(Sphere::new(
+        Point3::new(0., -1000., 0.),
+        1000.,
+        ground_material,
+    )));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat: f64 = random();
+            let center = Point3::new(
+                a as f64 + 0.9 * random::<f64>(),
+                0.2,
+                b as f64 + 0.9 * random::<f64>(),
+            );
+
+            if (center - Point3::new(4., 0.2, 0.)).len() > 0.9 {
+                let sphere_material: Box<dyn Material>;
+                match choose_mat {
+                    ..=0.8 => {
+                        // diffuse
+                        let albedo = Color(Vec3::random(0.0..1.)) * Color(Vec3::random(0.0..1.));
+                        sphere_material = Box::new(Lambertian::new(albedo));
+                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                    }
+                    ..=0.95 => {
+                        // metal
+                        let albedo = Color(Vec3::random(0.0..1.)) * Color(Vec3::random(0.0..1.));
+                        let fuzz = thread_rng().gen_range(0.0..0.5);
+
+                        sphere_material = Box::new(Metal::new(albedo, fuzz));
+                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                    }
+                    _ => {
+                        // glass
+
+                        sphere_material = Box::new(Dielectric::new(1.5));
+                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                    }
+                }
+            }
+        }
+    }
+
+    let material_1: Box<dyn Material> = Box::new(Dielectric::new(1.5));
+    world.add(Box::new(Sphere::new(
+        Point3::new(0., 1., 0.),
+        1.0,
+        material_1,
+    )));
+
+    let material_2: Box<dyn Material> = Box::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
+    world.add(Box::new(Sphere::new(
+        Point3::new(-4.0, 1., 0.),
+        1.0,
+        material_2,
+    )));
+
+    let material_3: Box<dyn Material> = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Box::new(Sphere::new(
+        Point3::new(4.0, 1., 0.),
+        1.0,
+        material_3,
+    )));
+
+    world
 }

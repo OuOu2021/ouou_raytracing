@@ -1,21 +1,20 @@
-use std::rc::Rc;
-
 use crate::{hittable::*, material::Material, vec3::*};
 pub struct Sphere {
     center: Point3,
     radius: f64,
-    material: Rc<dyn Material>,
+    material: Box<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64, material: &Rc<dyn Material>) -> Self {
+    pub fn new(center: Point3, radius: f64, material: Box<dyn Material>) -> Self {
         Self {
             center,
             radius,
-            material: Rc::clone(material),
+            material,
         }
     }
 }
+
 impl Hittable for Sphere {
     fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
         //光源指向球心
@@ -37,7 +36,7 @@ impl Hittable for Sphere {
             let t = root;
             let p = ray_in.at(t);
             let outward_normal = (p - self.center) / self.radius;
-            let mut ans = HitRecord::new(p, outward_normal, t, &self.material);
+            let mut ans = HitRecord::new(p, outward_normal, t, self.material.as_ref());
             ans.set_face_normal(&ray_in, outward_normal);
             Some(ans)
         }
