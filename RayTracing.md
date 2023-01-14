@@ -252,5 +252,12 @@ FOV横向和纵向不同，以横向为基准，纵向对横向乘一个洗漱�
 ![](imgs/2023-01-13-19-18-32.png)
 (图片不够直观，$\theta$视场角是两倍与z轴的夹角，所以计算tan要除以2,$h = \tan {(\frac \theta 2)}$)
 
+#### Positioning and Orienting the Camera
+`look_from`点到`look_at`点，加上`view_up`代表相机指向上方方向的向量，确定了一个相机的位置、朝向与旋转角度；再加上之前的视场角`vfov`就能确定获取图像的范围
+
+![](imgs/2023-01-14-17-10-39.png)
+用它们算出u,v,w,最终算出`origin`、`horizontal`、`vertical`、`lower_left_corner`这些变量
+
+
 
 

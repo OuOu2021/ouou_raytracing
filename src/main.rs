@@ -62,8 +62,6 @@ fn main() -> MyResult {
     // 初始化
     let mut _rng = thread_rng();
     let start_time = SystemTime::now();
-    let r: f64 = (PI / 4.).cos();
-
     // Image
     // 横纵比
     const ASPECT_RATIO: f64 = 16. / 9.;
@@ -75,22 +73,47 @@ fn main() -> MyResult {
     // World
     let mut world = HittableList::new();
 
-    let material_left = Rc::new(Lambertian::new(Color::new(0., 0., 1.)));
-    let material_right = Rc::new(Lambertian::new(Color::new(1., 0., 0.)));
+    let material_ground: Rc<dyn Material> = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let material_center: Rc<dyn Material> = Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+    let material_left: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
+    let material_right: Rc<dyn Material> = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.05));
 
     world.add(Box::new(Sphere::new(
-        Point3::new(-r, 0., -1.),
-        r,
-        &(material_left as Rc<dyn Material>),
+        Point3::new(0.0, -100.5, -1.0),
+        100.,
+        &material_ground,
     )));
     world.add(Box::new(Sphere::new(
-        Point3::new(r, 0., -1.),
-        r,
-        &(material_right as Rc<dyn Material>),
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+        &material_center,
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        &material_left,
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        -0.3,
+        &material_left,
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        &material_right,
     )));
 
     // Camera
-    let cam = Camera::new(90., ASPECT_RATIO);
+    let cam = Camera::new(
+        Point3::new(-2., 1., 1.),
+        Point3::new(0., 0., -1.),
+        Vec3::new(0., 1., 0.),
+        50.,
+        ASPECT_RATIO,
+    );
 
     // Render
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
