@@ -268,6 +268,25 @@ FOV横向和纵向不同，以横向为基准，纵向对横向乘一个洗漱�
 ![](imgs/2023-01-14-22-38-27.png)
 ![](imgs/2023-01-14-22-38-49.png)
 
+from 
+![](imgs/2023-01-15-22-45-39.png)
+to
+![](imgs/2023-01-15-22-45-57.png)
+using Rayon
 
 #### 交流
 [Remda：3本,Rust,Rayon并行优化](https://rustcc.cn/article?id=bffdbc8b-1c99-4d1d-942c-91365b6ada0d)
+[fralken: 3本,Rust,Rayon并行优化](https://github.com/fralken/ray-tracing-in-one-weekend)
+[Rust, high-performance](https://github.com/skyzh/raytracer.rs/)
+[Writing About Ray Tracing in One Weekend with Rust Blog](https://andy.stanton.is/writing/about/ray-tracing-in-one-weekend/)
+
+#### 进步
+[多线程编程的秘密：Sync, Send, and 'Static](https://zhuanlan.zhihu.com/p/362285521)
+[Rayon 并行优化](https://developers.redhat.com/blog/2021/04/30/how-rust-makes-rayons-data-parallelism-magical#generic_constraints_in_rayon)
+[BVH场景管理加速光线追踪](https://blog.icysky.site/archives/164)
+[BVH](https://blog.csdn.net/m0_56399931/article/details/124145240)
+
+### 总结
+#### 《Ray Tracing in One Weekend》 之旅
+
+#### Rust 语言

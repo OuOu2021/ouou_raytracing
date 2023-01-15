@@ -2,11 +2,11 @@ use crate::{hittable::*, material::Material, vec3::*};
 pub struct Sphere {
     center: Point3,
     radius: f64,
-    material: Box<dyn Material>,
+    material: Box<dyn Material + Send + Sync>,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64, material: Box<dyn Material>) -> Self {
+    pub fn new(center: Point3, radius: f64, material: Box<dyn Material + Send + Sync>) -> Self {
         Self {
             center,
             radius,

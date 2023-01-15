@@ -1,9 +1,8 @@
 use crate::{hittable::*, ray::Ray};
 
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
+    objects: Vec<Box<dyn Hittable + Send + Sync>>,
 }
-unsafe impl Sync for HittableList {}
 
 impl HittableList {
     pub fn new() -> Self {
@@ -14,7 +13,7 @@ impl HittableList {
     pub fn clear(&mut self) {
         self.objects.clear();
     }
-    pub fn add(&mut self, obj: Box<dyn Hittable>) {
+    pub fn add(&mut self, obj: Box<dyn Hittable + Send + Sync>) {
         self.objects.push(obj);
     }
 }

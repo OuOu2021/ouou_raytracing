@@ -13,7 +13,6 @@ use ouou_raytracing::{
 
 use rayon::prelude::*;
 use std::{
-    sync::Arc,
     time::SystemTime,
     {f64::INFINITY, io::stdout},
 };
@@ -35,7 +34,7 @@ fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> Option<f64> {
 */
 
 /// 接受光线，计算光线打在视口上的颜色
-fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
+fn ray_color(r_in: &Ray, world: &(dyn Hittable + Send + Sync), depth: u32) -> Color {
     if depth <= 0 {
         return Color::black();
     }
@@ -67,9 +66,9 @@ fn main() -> MyResult {
     // Image
     // 横纵比
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 1280;
+    const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize; //225
-    const SAMPLE_PER_PIXEL: u32 = 500;
+    const SAMPLE_PER_PIXEL: u32 = 100;
     const MAX_DEPTH: u32 = 50;
 
     // World
@@ -107,7 +106,7 @@ fn main() -> MyResult {
     // )));
 
     // Camera
-    let look_from = Point3::new(13., 2., 3.);
+    let look_from = Point3::new(13., 2.0, 5.);
     let look_at = Point3::new(0., 0., 0.);
     let vup = Vec3::new(0., 1., 0.);
     let dist_to_focus = 10.0;
@@ -133,7 +132,7 @@ fn main() -> MyResult {
         }
         (0..IMAGE_WIDTH).into_iter().for_each(|i| {
             let pixel_color = (0..SAMPLE_PER_PIXEL)
-                .into_par_iter()
+                .into_iter()
                 .map(|_| {
                     //将像素坐标转换为场景坐标，然后在附近随机采样
                     //gen方法默认就是生成[0,1)的浮点数
@@ -160,32 +159,50 @@ fn main() -> MyResult {
 
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    let ground_material = Box::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    let ground_material = Box::new(Lambertian::new(Color::new(0.796875, 0.99, 0.59765625)));
     world.add(Box::new(Sphere::new(
         Point3::new(0., -1000., 0.),
         1000.,
         ground_material,
     )));
-
+    let c = [
+        Point3::new(0., 1., 0.),
+        Point3::new(-4.0, 1., 0.),
+        Point3::new(4.0, 1., 0.),
+    ];
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat: f64 = random();
-            let center = Point3::new(
+            let mut center = Point3::new(
                 a as f64 + 0.9 * random::<f64>(),
                 0.2,
                 b as f64 + 0.9 * random::<f64>(),
             );
+            loop {
+                if (center - c[0]).len() < 1.2
+                    || (center - c[1]).len() < 1.2
+                    || (center - c[2]).len() < 1.2
+                {
+                    center = Point3::new(
+                        a as f64 + 0.9 * random::<f64>(),
+                        0.2,
+                        b as f64 + 0.9 * random::<f64>(),
+                    );
+                } else {
+                    break;
+                }
+            }
 
             if (center - Point3::new(4., 0.2, 0.)).len() > 0.9 {
-                let sphere_material: Box<dyn Material>;
+                let sphere_material: Box<dyn Material + Send + Sync>;
                 match choose_mat {
-                    ..=0.8 => {
+                    (0.0..=0.8) => {
                         // diffuse
                         let albedo = Color(Vec3::random(0.0..1.)) * Color(Vec3::random(0.0..1.));
                         sphere_material = Box::new(Lambertian::new(albedo));
                         world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
                     }
-                    ..=0.95 => {
+                    0.0..=0.95 => {
                         // metal
                         let albedo = Color(Vec3::random(0.0..1.)) * Color(Vec3::random(0.0..1.));
                         let fuzz = thread_rng().gen_range(0.0..0.5);
@@ -204,26 +221,14 @@ fn random_scene() -> HittableList {
         }
     }
 
-    let material_1: Box<dyn Material> = Box::new(Dielectric::new(1.5));
-    world.add(Box::new(Sphere::new(
-        Point3::new(0., 1., 0.),
-        1.0,
-        material_1,
-    )));
+    let material_1 = Box::new(Dielectric::new(1.5));
+    world.add(Box::new(Sphere::new(c[0], 1.0, material_1)));
 
-    let material_2: Box<dyn Material> = Box::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
-    world.add(Box::new(Sphere::new(
-        Point3::new(-4.0, 1., 0.),
-        1.0,
-        material_2,
-    )));
+    let material_2 = Box::new(Lambertian::new(Color::new(0.3984375, 0.796875, 0.99)));
+    world.add(Box::new(Sphere::new(c[1], 1.0, material_2)));
 
-    let material_3: Box<dyn Material> = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Box::new(Sphere::new(
-        Point3::new(4.0, 1., 0.),
-        1.0,
-        material_3,
-    )));
+    let material_3 = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Box::new(Sphere::new(c[2], 1.0, material_3)));
 
     world
 }
