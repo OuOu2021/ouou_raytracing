@@ -1,7 +1,6 @@
-use crate::{utility::clamp, vec3::*, MyResult};
-use std::io::{Stdout, Write};
+use crate::{utility::clamp, vec3::*};
 
-pub fn write_color(out: &mut Stdout, pixel_color: &Color, samples_per_pixel: u32) -> MyResult {
+pub fn write_color(pixel_color: &Color, samples_per_pixel: u32) -> image::Rgb<u8> {
     let scale = 1. / samples_per_pixel as f64;
     let (r, g, b) = pixel_color.0.to_tuple();
 
@@ -10,12 +9,9 @@ pub fn write_color(out: &mut Stdout, pixel_color: &Color, samples_per_pixel: u32
     let (r, g, b) = (m(r), m(g), m(b));
 
     let rg = 0.0..0.999;
-    writeln!(
-        out,
-        "{} {} {}",
+    image::Rgb([
         (256. * clamp(r, rg.clone())) as u8,
         (256. * clamp(g, rg.clone())) as u8,
-        (256. * clamp(b, rg)) as u8
-    )?;
-    Ok(())
+        (256. * clamp(b, rg)) as u8,
+    ])
 }

@@ -279,7 +279,7 @@ using Rayon
 [fralken: 3本,Rust,Rayon并行优化](https://github.com/fralken/ray-tracing-in-one-weekend)
 [Rust, high-performance](https://github.com/skyzh/raytracer.rs/)
 [Writing About Ray Tracing in One Weekend with Rust Blog](https://andy.stanton.is/writing/about/ray-tracing-in-one-weekend/)
-
+[How can I share immutable data between threads in Rust?](https://stackoverflow.com/questions/62744175/how-can-i-share-immutable-data-between-threads-in-rust?r=SearchResults)
 #### 进步
 [多线程编程的秘密：Sync, Send, and 'Static](https://zhuanlan.zhihu.com/p/362285521)
 [Rayon 并行优化](https://developers.redhat.com/blog/2021/04/30/how-rust-makes-rayons-data-parallelism-magical#generic_constraints_in_rayon)
@@ -287,6 +287,49 @@ using Rayon
 [BVH](https://blog.csdn.net/m0_56399931/article/details/124145240)
 
 ### 总结
-#### 《Ray Tracing in One Weekend》 之旅
+#### 《Ray Tracing in One Weekend》之旅
+在被中间一次旅游打断的总共花了一周的《Ray Tracing in One Weekend》之旅中我走进了光线追踪的世界：
+* 从镜头里射出光线，再通过光路可逆原理得到进入镜头射到某个像素点上的光线颜色；
+* 看似简单却又有许多门道的随机能产生出漫反射纹理；
+* 光源与接触物体颜色RGB分别相乘得到的就是它们“混合”出的颜色(因为物体本身常常呈现的颜色其实是它对不同波长光线的出射率决定的)。其实对应PS里的"**正片叠底**"
+* 各种数学公式推导，包括相对比较复杂的折射与全反射；
+* `Schlick's approximation`等神奇的hack操作······
+![](imgs/2023-01-16-14-21-23.png)
 
 #### Rust 语言
+这个项目对我的Rust来说也算是一次超纲演练。碰到了不少课本上不会出现的复杂或怪异的问题：
+* 各种自定义类型到底应该选择`Copy`&`Clone`还是`Move`(`Copy`与`Clone`也混淆了，往往将两个绑定在了一起)；
+* `match`中出现浮点数字面量是不受支持的行为(包括看起来无比自然的`Range`)；这个追踪了好久相关issue，了解到它无法被支持的的一些复杂原因，和暂时(或许永远)不会被弃用的消息，但为了不报警告还是用匹配守卫替代了它
+* `Box<dyn T>`打包与`&dyn T`+生命周期`lifetime`管理的借用之间到底如何选择；
+* 多态到底选择泛型`generic`(`impl Trait`是其语法糖，实际就是静态分发)，还是`dyn Trait Object`动态分发，还是比较少见的`enum+struct`。它们之间到底有什么本质区别，什么场景更适合选择什么；
+* 忘记了`trait`可以继承(实际上相比继承更应该看作**前置依赖**)，导致并发时`trait object`缺少`Sync&Send`标记`Trait`而需要在参数里写无数遍`&dyn Hittable + Send + Sync`
+······
+
+所以现在就是一个总结提升Rust的良机
+##### Copy与Clone
+`Copy`: 向编译器说明该类型的语义，与`Move`相反；代表重新绑定行为时(包括`let`、函数传参)的默认行为应该是：`Clone`一份副本，原来的绑定仍有效；还是`Move`移交所有权，原来的绑定失效
+
+`Clone`: `#[derive(Clone)]`向编译器说明该类型可以逐比特拷贝，并生成默认实现；或者手动实现语义相同而实际行为可能不同的`Clone`操作(如`Rc`的`Clone`实际是引用计数+1; `Box`的`Clone`实际是深拷贝)
+
+##### 面向对象 & 多态
+`Rust`的面向对象特性在这个项目来看是很够用的，和写C++没太大差别。
+至于到底用泛型还是动态多态，动态多态 灵活/拓展性更强，省空间；泛型速度更快，而二进制代码会更大；但现在的代码来看区别不大
+
+##### 并发
+`Sync`：对象可以安全地在线程间通过不可变借用(可变借用不可能线程安全)来共享(未实现它的反例：`Rc`；`Cell`)
+
+`Send`：对象可以安全地在线程之间传递所有权(未实现它的反例：`Rc`的引用计数是线程不安全的，所以无法实现共享所有权，需要用`Arc`)
+
+`&T`实现了`Send` 等价于 `T`实现了`Sync`
+
+这里其实还是没有完全搞懂，因为还涉及锁(`Mutex​`)、内部可变性(`Cell`、`​RefCell`)等问题；暂时没有研究
+
+##### crates
+`Image`: 非常丝滑，现在可以生成`png`来代替之前的`ppm`了
+
+`Rayon`: 弄懂`Sync``Send`与`Trait`继承以后非常丝滑，让采样过程轻易地并行化，提速显著
+
+`cargo`非常棒，但编译雀食慢...
+
+#### 下一步
+稍微看了看后面的添加光源、添加形状、材质、动态模糊、BVH加速(光线追踪硬件单元的基础)等内容。但现在有缓考科目和CPC寒假集训的压力应该暂时不会开坑了。

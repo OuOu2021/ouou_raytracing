@@ -13,16 +13,11 @@ pub struct HitRecord<'a> {
     pub normal: Vec3,
     pub t: f64,
     pub front_face: Option<bool>,
-    pub material: &'a (dyn Material + Send + Sync),
+    pub material: &'a dyn Material,
 }
 
 impl<'a> HitRecord<'a> {
-    pub fn new(
-        p: Point3,
-        normal: Vec3,
-        t: f64,
-        material: &'a (dyn Material + Send + Sync),
-    ) -> Self {
+    pub fn new(p: Point3, normal: Vec3, t: f64, material: &'a dyn Material) -> Self {
         Self {
             p,
             normal,
@@ -41,6 +36,6 @@ impl<'a> HitRecord<'a> {
     }
 }
 
-pub trait Hittable {
+pub trait Hittable: Send + Sync {
     fn hit(&self, ray_in: &Ray, t_range: &Range<f64>) -> Option<HitRecord>;
 }
