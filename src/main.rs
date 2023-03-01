@@ -17,10 +17,12 @@ use std::{f64::INFINITY, time::SystemTime};
 
 /// 接受光线，计算光线打在视口上的颜色
 fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
+    // 超过反射次数限制，返回黑色
     if depth <= 0 {
         return Color::black();
     }
 
+    // 左边界0.001而非0是为了避免误差导致射中物体内部
     if let Some(rec) = world.hit(&r_in, &(0.001..INFINITY)) {
         if let Some((scattered, attenuation)) = rec.material.scatter(r_in, &rec) {
             attenuation * ray_color(&scattered, world, depth - 1)
@@ -44,6 +46,7 @@ fn main() -> MyResult {
     eprintln!("Start Initializing");
     let mut _rng = thread_rng();
     let start_time = SystemTime::now();
+    
     // Image
     // 横纵比
     const ASPECT_RATIO: f64 = 16. / 9.;
