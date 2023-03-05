@@ -79,7 +79,7 @@ impl Vec3 {
             e: [
                 rng.gen_range(rg.clone()),
                 rng.gen_range(rg.clone()),
-                rng.gen_range(rg.clone()),
+                rng.gen_range(rg),
             ],
         }
     }

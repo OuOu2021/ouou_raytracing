@@ -3,12 +3,14 @@ use crate::{hittable::*, ray::Ray};
 pub struct HittableList {
     objects: Vec<Box<dyn Hittable>>,
 }
-
+impl Default for HittableList {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl HittableList {
-    pub fn new() -> Self {
-        Self {
-            objects: Vec::new(),
-        }
+    pub fn new() -> Self{
+        Self { objects: Vec::new() }
     }
     pub fn clear(&mut self) {
         self.objects.clear();
@@ -22,7 +24,7 @@ impl Hittable for HittableList {
     fn hit(&self, ray: &Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
         self.objects
             .iter()
-            .filter_map(|x| x.hit(&ray, &t_range))
+            .filter_map(|x| x.hit(ray, t_range))
             .min_by(|x, y| x.t.partial_cmp(&y.t).expect("无法比较"))
     }
 }

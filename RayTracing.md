@@ -333,3 +333,30 @@ using Rayon
 
 #### 下一步
 稍微看了看后面的添加光源、添加形状、材质、动态模糊、BVH加速(光线追踪硬件单元的基础)等内容。但现在有缓考科目和CPC寒假集训的压力应该暂时不会开坑了。
+
+# Ray Tracing the Next Week Notes
+[The Next Week笔记(上篇)](https://zhuanlan.zhihu.com/p/44503768)
+[The Next Week笔记(下篇)](https://zhuanlan.zhihu.com/p/48643909)
+[难点](https://zhuanlan.zhihu.com/p/80108202)
+
+in one weekend 的问题：
+* 只有球体->引入矩形
+* 只有环境光源(蓝色渐变背景作为光源)->添加点光源等光源
+* 性能太低(`hittable_list`->层次包围盒`BVH,Bounding Volume Hierarchies`)
+* 只能静物->引入时间变量、动态模糊效果
+* 只有出射效果，没有纹理->引入纹理贴图、柏林噪声纹理
+* 没有体积渲染->添加体积烟雾，在内部发生散射
+
+## Motion Blur
+### 考虑时间的光线追踪 Introduction of SpaceTime Ray Tracing
+用蛮力(Brute-Force)就可以实现动态模糊：模拟快门时间，每个像素看到的颜色是一段时间的平均；相机和物体都可以随时间移动
+
+### 更新相机类来模拟动态模糊 Updating the Camera to Simulate Motion Blur
+修改`get_ray`函数，在相机快门时间范围内随机一个时间点，假设光线在那个时间出现
+
+### 实现移动的球体
+球心在两个时间点从一处变到另一处，依此写出球心`center`关于时间的函数
+
+以普通球体为基础写出`hit`。光线与球体相交时只考虑光线出现时间对应的球心位置，相当于只是用两点确定球的直线路径，而非只在该时间范围内存在
+
+![](products\moving_shpere.png)

@@ -25,14 +25,14 @@ impl Lambertian {
 impl Material for Lambertian {
     fn scatter(
         &self,
-        _: &Ray, /*漫反射的散射与入射光无关*/
+        ray_in: &Ray, /*漫反射的散射与入射光方向无关，但与时间有关*/
         rec: &HitRecord,
     ) -> Option<(Ray, Color)> {
         let mut scatter_direction = rec.normal + Vec3::random_unit(1.);
         if scatter_direction.near_zero() {
             scatter_direction = rec.normal;
         }
-        Some((Ray::new(rec.p, scatter_direction), self.albedo))
+        Some((Ray::new(rec.p, scatter_direction, ray_in.time()), self.albedo))
     }
 }
 
@@ -52,7 +52,7 @@ impl Metal {
 impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
         let reflected = ray_in.direction().to_unit().reflect(rec.normal);
-        let scattered = Ray::new(rec.p, reflected + self.fuzz * Vec3::random_in_sphere(1.));
+        let scattered = Ray::new(rec.p, reflected + self.fuzz * Vec3::random_in_sphere(1.), ray_in.time());
         let attenuation = self.albedo;
         if scattered.direction().dot_mul(rec.normal) > 0. {
             Some((scattered, attenuation))
@@ -78,7 +78,7 @@ impl Dielectric {
     }
 }
 impl Material for Dielectric {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
         let attenuation = Color::new(0.98, 0.98, 0.98);
         let refraction_ratio = if let Some(a) = rec.front_face {
             if a {
@@ -89,7 +89,7 @@ impl Material for Dielectric {
         } else {
             panic!()
         };
-        let unit_direction = r_in.direction().to_unit();
+        let unit_direction = ray_in.direction().to_unit();
         let cos_theta = -unit_direction.dot_mul(rec.normal).min(1.);
         let sin_theta = (1. - cos_theta * cos_theta).sqrt();
 
@@ -97,13 +97,13 @@ impl Material for Dielectric {
         if cannot_refract || Dielectric::reflectance(cos_theta, refraction_ratio) > random() {
             // 全反射
             Some((
-                Ray::new(rec.p, unit_direction.reflect(rec.normal)),
+                Ray::new(rec.p, unit_direction.reflect(rec.normal), ray_in.time()),
                 attenuation,
             ))
         } else {
             // 折射
             Some((
-                Ray::new(rec.p, unit_direction.refract(rec.normal, refraction_ratio)),
+                Ray::new(rec.p, unit_direction.refract(rec.normal, refraction_ratio), ray_in.time()),
                 attenuation,
             ))
         }

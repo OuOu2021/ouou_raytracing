@@ -1,3 +1,7 @@
+use std::ops::Range;
+
+use rand::{thread_rng, Rng};
+
 use crate::{
     ray::Ray,
     vec3::{Point3, Vec3},
@@ -11,7 +15,9 @@ pub struct Camera {
     lens_radius: f64,
     u: Vec3,
     v: Vec3,
-    w: Vec3,
+    _w: Vec3,
+    // shutter and close
+    time: Range<f64>,
 }
 
 /*
@@ -47,6 +53,7 @@ impl Camera {
             self.lower_left_corner.0 + s * self.horizontal + t * self.vertical
                 - self.origin.0
                 - offset,
+            thread_rng().gen_range(self.time.clone())
         )
     }
 
@@ -60,6 +67,7 @@ impl Camera {
         aperture: f64,
         // distance from focus plane
         focus_dist: f64,
+        time: Range<f64>,
     ) -> Self {
         let theta = vfov.to_radians();
         let h = (theta / 2.).tan();
@@ -84,8 +92,9 @@ impl Camera {
             lower_left_corner,
             u,
             v,
-            w,
+            _w: w,
             lens_radius,
+            time,
         }
     }
 }

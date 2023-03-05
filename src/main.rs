@@ -9,7 +9,7 @@ use ouou_raytracing::{
     sphere::Sphere,
     utility::*,
     vec3::*,
-    MyResult,
+    MyResult, moving_sphere::MovingSphere,
 };
 
 use rayon::prelude::*;
@@ -18,12 +18,12 @@ use std::{f64::INFINITY, time::SystemTime};
 /// 接受光线，计算光线打在视口上的颜色
 fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
     // 超过反射次数限制，返回黑色
-    if depth <= 0 {
+    if depth == 0 {
         return Color::black();
     }
 
     // 左边界0.001而非0是为了避免误差导致射中物体内部
-    if let Some(rec) = world.hit(&r_in, &(0.001..INFINITY)) {
+    if let Some(rec) = world.hit(r_in, &(0.001..INFINITY)) {
         if let Some((scattered, attenuation)) = rec.material.scatter(r_in, &rec) {
             attenuation * ray_color(&scattered, world, depth - 1)
         } else {
@@ -50,7 +50,7 @@ fn main() -> MyResult {
     // Image
     // 横纵比
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: u32 = 1920;
+    const IMAGE_WIDTH: u32 = 800;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32; //225
     const SAMPLE_PER_PIXEL: u32 = 100;
     const MAX_DEPTH: u32 = 500;
@@ -73,6 +73,7 @@ fn main() -> MyResult {
         ASPECT_RATIO,
         aperture,
         dist_to_focus,
+        0.0..1.0
     );
 
     // Render
@@ -160,7 +161,9 @@ fn random_scene() -> HittableList {
                         // diffuse
                         let albedo = Color(Vec3::random(0.0..1.)) * Color(Vec3::random(0.0..1.));
                         sphere_material = Box::new(Lambertian::new(albedo));
-                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                        
+                        let center_2 = center +Vec3::new(0., thread_rng().gen_range(0.0..0.5), 0.);
+                        world.add(Box::new(MovingSphere::new((center,center_2), 0.2, sphere_material, 0.0..1.0)));
                     }
                     b if (0.0..=0.95).contains(&b) => {
                         // metal
@@ -193,7 +196,7 @@ fn random_scene() -> HittableList {
     world
 }
 
-fn scene_2() -> HittableList {
+fn _scene_2() -> HittableList {
     let mut world = HittableList::new();
     let material_ground = Box::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
     let material_center = Box::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
