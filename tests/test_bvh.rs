@@ -17,6 +17,8 @@ use std::time::SystemTime;
 
 #[cfg(test)]
 mod test_bvh {
+    use std::sync::Arc;
+
     use super::*;
 
     #[test]
@@ -99,7 +101,7 @@ mod test_bvh {
     fn bvh_random_scene() -> BvhNode {
         let mut world = HittableList::new();
         let ground_material = Box::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
-        world.add(Box::new(Sphere::new(
+        world.add(Arc::new(Sphere::new(
             Point3::new(0., -1000., 0.),
             1000.,
             ground_material,
@@ -143,7 +145,7 @@ mod test_bvh {
 
                             let center_2 =
                                 center + Vec3::new(0., thread_rng().gen_range(0.0..0.5), 0.);
-                            world.add(Box::new(MovingSphere::new(
+                            world.add(Arc::new(MovingSphere::new(
                                 (center, center_2),
                                 0.2,
                                 sphere_material,
@@ -157,12 +159,12 @@ mod test_bvh {
                             let fuzz = thread_rng().gen_range(0.0..0.5);
 
                             sphere_material = Box::new(Metal::new(albedo, fuzz));
-                            world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                            world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
                         }
                         _ => {
                             // glass
                             sphere_material = Box::new(Dielectric::new(1.5));
-                            world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                            world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
                         }
                     }
                 }
@@ -170,13 +172,13 @@ mod test_bvh {
         }
 
         let material_1 = Box::new(Dielectric::new(1.5));
-        world.add(Box::new(Sphere::new(c[0], 1.0, material_1)));
+        world.add(Arc::new(Sphere::new(c[0], 1.0, material_1)));
 
         let material_2 = Box::new(Lambertian::new(Color::new(0.3984375, 0.796875, 0.99)));
-        world.add(Box::new(Sphere::new(c[1], 1.0, material_2)));
+        world.add(Arc::new(Sphere::new(c[1], 1.0, material_2)));
 
         let material_3 = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
-        world.add(Box::new(Sphere::new(c[2], 1.0, material_3)));
+        world.add(Arc::new(Sphere::new(c[2], 1.0, material_3)));
 
         BvhNode::from_hittable_list(world, &(0.0..1.0))
     }

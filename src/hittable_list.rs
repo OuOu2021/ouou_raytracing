@@ -1,8 +1,11 @@
+use std::sync::Arc;
+
 use crate::{aabb::surrounding_box, hittable::*, ray::Ray};
 
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
+    objects: Vec<Arc<dyn Hittable>>,
 }
+
 impl Default for HittableList {
     fn default() -> Self {
         Self::new()
@@ -17,15 +20,19 @@ impl HittableList {
     pub fn clear(&mut self) {
         self.objects.clear();
     }
-    pub fn add(&mut self, obj: Box<dyn Hittable>) {
+    pub fn add(&mut self, obj: Arc<dyn Hittable>) {
         self.objects.push(obj);
     }
-    pub fn get_objects(&self) -> &Vec<Box<dyn Hittable>> {
+    pub fn get_objects(&self) -> &Vec<Arc<dyn Hittable>> {
         &self.objects
     }
+    pub fn get_objects_mut(&mut self) -> &mut Vec<Arc<dyn Hittable>> {
+        &mut self.objects
+    }
 }
-impl Into<Vec<Box<dyn Hittable>>> for HittableList{
-    fn into(self) -> Vec<Box<dyn Hittable>> {
+
+impl Into<Vec<Arc<dyn Hittable>>> for HittableList{
+    fn into(self) -> Vec<Arc<dyn Hittable>> {
         self.objects
     }
 }
