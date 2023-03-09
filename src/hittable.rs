@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 use crate::{
+    aabb::AABB,
     material::Material,
     ray::Ray,
     vec3::{Point3, Vec3},
@@ -36,6 +37,7 @@ impl<'a> HitRecord<'a> {
     }
 }
 
-pub trait Hittable: Send + Sync {
+pub trait Hittable: Sync {
     fn hit(&self, ray_in: &Ray, t_range: &Range<f64>) -> Option<HitRecord>;
+    fn bounding_box(&self, time: &Range<f64>) -> Option<AABB>;
 }

@@ -351,14 +351,33 @@ impl Add<Vec3> for Point3 {
     }
 }
 
+impl Sub<Vec3> for Point3 {
+    type Output = Point3;
+
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Point3::new(self.0[0] - rhs[0], self.0[1] - rhs[1], self.0[2] - rhs[2])
+    }
+}
+
 impl Sub<Point3> for Point3 {
     type Output = Vec3;
 
     fn sub(self, rhs: Point3) -> Self::Output {
-        Vec3::new(
-            self.0[0] - rhs.0[0],
-            self.0[1] - rhs.0[1],
-            self.0[2] - rhs.0[2],
-        )
+        Vec3::new(self.0[0] - rhs[0], self.0[1] - rhs[1], self.0[2] - rhs[2])
+    }
+}
+
+// 以下是语法糖
+impl Index<usize> for Point3 {
+    type Output = f64;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+impl IndexMut<usize> for Point3 {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index]
     }
 }

@@ -1,15 +1,25 @@
 use std::ops::Range;
 
-use crate::{hittable::*, material::Material, vec3::*};
+use crate::{
+    aabb::{surrounding_box, AABB},
+    hittable::*,
+    material::Material,
+    vec3::*,
+};
 pub struct MovingSphere {
-    center: (Point3,Point3),
+    center: (Point3, Point3),
     radius: f64,
     material: Box<dyn Material + Send + Sync>,
     time: Range<f64>,
 }
 
 impl MovingSphere {
-    pub fn new(center: (Point3, Point3), radius: f64, material: Box<dyn Material + Send + Sync>, time: Range<f64>) -> Self {
+    pub fn new(
+        center: (Point3, Point3),
+        radius: f64,
+        material: Box<dyn Material + Send + Sync>,
+        time: Range<f64>,
+    ) -> Self {
         Self {
             center,
             radius,
@@ -17,19 +27,16 @@ impl MovingSphere {
             time,
         }
     }
-    pub fn center(&self, time: f64) -> Option<Point3>{
-        if self.time.contains(&time){
-           Some(self.center.0+((time-self.time.start)/(self.time.end-self.time.start))*(self.center.1-self.center.0))
-        }
-        else {
-            None
-        }
+    pub fn center(&self, time: f64) -> Point3 {
+        self.center.0
+            + ((time - self.time.start) / (self.time.end - self.time.start))
+                * (self.center.1 - self.center.0)
     }
 }
 
 impl Hittable for MovingSphere {
     fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
-        let center = self.center(ray_in.time()).unwrap();
+        let center = self.center(ray_in.time());
         //光源指向球心
         let oc = ray_in.origin() - center;
         let a = ray_in.direction().len_squared();
@@ -53,5 +60,18 @@ impl Hittable for MovingSphere {
             ans.set_face_normal(ray_in, outward_normal);
             Some(ans)
         }
+    }
+
+    fn bounding_box(&self, time: &Range<f64>) -> Option<crate::aabb::AABB> {
+        let r = self.radius;
+        let box0 = AABB::new(
+            self.center(time.start) - Vec3::new(r, r, r),
+            self.center(time.start) + Vec3::new(r, r, r),
+        );
+        let box1 = AABB::new(
+            self.center(time.end) - Vec3::new(r, r, r),
+            self.center(time.end) + Vec3::new(r, r, r),
+        );
+        Some(surrounding_box(&box0, &box1))
     }
 }

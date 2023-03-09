@@ -53,7 +53,7 @@ impl Camera {
             self.lower_left_corner.0 + s * self.horizontal + t * self.vertical
                 - self.origin.0
                 - offset,
-            thread_rng().gen_range(self.time.clone())
+            thread_rng().gen_range(self.time.clone()),
         )
     }
 

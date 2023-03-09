@@ -1,4 +1,4 @@
-use crate::{hittable::*, material::Material, vec3::*};
+use crate::{aabb::AABB, hittable::*, material::Material, vec3::*};
 pub struct Sphere {
     center: Point3,
     radius: f64,
@@ -40,5 +40,13 @@ impl Hittable for Sphere {
             ans.set_face_normal(ray_in, outward_normal);
             Some(ans)
         }
+    }
+
+    fn bounding_box(&self, _time: &std::ops::Range<f64>) -> Option<crate::aabb::AABB> {
+        let r = self.radius;
+        Some(AABB::new(
+            self.center - Vec3::new(r, r, r),
+            self.center + Vec3::new(r, r, r),
+        ))
     }
 }
