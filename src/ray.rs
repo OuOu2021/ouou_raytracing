@@ -58,7 +58,7 @@ pub fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
         let unit_direction = r_in.direction().to_unit();
 
         // 把y作为t来线性混合，同时确保t是正数所以做了这么个转换
-        let t = 0.5 * (unit_direction.get_y() + 1.0);
+        let t = 0.5 * (unit_direction.y() + 1.0);
 
         // Blend 公式 天蓝色和白色混合，其实就是二维线性插值
         (1. - t) * Color(Vec3::new(1., 1., 1.)) + t * Color(Vec3::new(0.5, 0.7, 1.))

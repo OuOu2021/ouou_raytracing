@@ -31,9 +31,9 @@ impl HittableList {
     }
 }
 
-impl Into<Vec<Arc<dyn Hittable>>> for HittableList{
-    fn into(self) -> Vec<Arc<dyn Hittable>> {
-        self.objects
+impl From<HittableList> for Vec<Arc<dyn Hittable>> {
+    fn from(value: HittableList) -> Self {
+        value.objects
     }
 }
 

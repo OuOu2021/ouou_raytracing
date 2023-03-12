@@ -1,11 +1,10 @@
-use std::ops::Range;
-
 use crate::{
     aabb::AABB,
     material::Material,
     ray::Ray,
     vec3::{Point3, Vec3},
 };
+use std::{ops::Range, sync::Arc};
 
 pub struct HitRecord<'a> {
     // 交点
@@ -15,16 +14,26 @@ pub struct HitRecord<'a> {
     pub t: f64,
     pub front_face: Option<bool>,
     pub material: &'a dyn Material,
+
+    // uv coordinates of hit point's texture
+    pub texture_uv: (f64, f64),
 }
 
 impl<'a> HitRecord<'a> {
-    pub fn new(p: Point3, normal: Vec3, t: f64, material: &'a dyn Material) -> Self {
+    pub fn new(
+        p: Point3,
+        normal: Vec3,
+        t: f64,
+        material: &'a dyn Material,
+        uv: (f64, f64),
+    ) -> Self {
         Self {
             p,
             normal,
             t,
             front_face: None,
             material,
+            texture_uv: uv,
         }
     }
     pub fn set_face_normal(&mut self, ray_in: &Ray, outward_normal: Vec3) {
@@ -41,3 +50,8 @@ pub trait Hittable: Sync + Send {
     fn hit(&self, ray_in: &Ray, t_range: &Range<f64>) -> Option<HitRecord>;
     fn bounding_box(&self, time: &Range<f64>) -> Option<AABB>;
 }
+
+pub mod bvh;
+pub mod hittable_list;
+pub mod moving_sphere;
+pub mod sphere;

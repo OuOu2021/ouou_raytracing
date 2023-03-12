@@ -46,7 +46,7 @@ impl Default for Camera {
 impl Camera {
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {
         let random_disk = self.lens_radius * Vec3::random_in_unit_disk();
-        let offset = self.u * random_disk.get_x() + self.v * random_disk.get_y();
+        let offset = self.u * random_disk.x() + self.v * random_disk.y();
 
         Ray::new(
             self.origin + offset,

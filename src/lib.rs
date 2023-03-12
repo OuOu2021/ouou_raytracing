@@ -1,16 +1,17 @@
 use std::error::Error;
 
 pub mod aabb;
-pub mod bvh;
+
 pub mod camera;
 pub mod color;
 pub mod hittable;
-pub mod hittable_list;
 pub mod material;
-pub mod moving_sphere;
 pub mod ray;
-pub mod sphere;
+pub mod textures;
 pub mod utility;
 pub mod vec3;
+
+#[cfg(test)]
+mod test;
 
 pub type MyResult = Result<(), Box<dyn Error>>;

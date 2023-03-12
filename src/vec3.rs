@@ -43,13 +43,13 @@ impl Vec3 {
             e: [self.e[0] / len, self.e[1] / len, self.e[2] / len],
         }
     }
-    pub fn get_x(&self) -> f64 {
+    pub fn x(&self) -> f64 {
         self.e[0]
     }
-    pub fn get_y(&self) -> f64 {
+    pub fn y(&self) -> f64 {
         self.e[1]
     }
-    pub fn get_z(&self) -> f64 {
+    pub fn z(&self) -> f64 {
         self.e[2]
     }
     pub fn len(&self) -> f64 {
@@ -337,6 +337,15 @@ impl Point3 {
     }
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Point3(Vec3::new(x, y, z))
+    }
+    pub fn x(&self) -> f64 {
+        self.0.e[0]
+    }
+    pub fn y(&self) -> f64 {
+        self.0.e[1]
+    }
+    pub fn z(&self) -> f64 {
+        self.0.e[2]
     }
 }
 impl Add<Vec3> for Point3 {

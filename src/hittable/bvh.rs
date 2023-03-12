@@ -1,12 +1,8 @@
-use std::{ops::Range, sync::Arc};
-
 use rand::{thread_rng, Rng};
 
-use crate::{
-    aabb::{surrounding_box, AABB},
-    hittable::Hittable,
-    hittable_list::HittableList,
-};
+use crate::aabb::surrounding_box;
+
+use super::{hittable_list::HittableList, *};
 
 /// Bounding Volume Hierarchies
 /// 层次包围盒
@@ -17,8 +13,8 @@ pub struct BvhNode {
 }
 
 impl BvhNode {
-    pub fn from_hittable_list(mut list: HittableList, t_range: &Range<f64>) -> Self{
-        Self::new(&mut list.get_objects_mut(), t_range)
+    pub fn from_hittable_list(mut list: HittableList, t_range: &Range<f64>) -> Self {
+        Self::new(list.get_objects_mut(), t_range)
     }
     pub fn new(src_object: &mut [Arc<dyn Hittable>], t_range: &Range<f64>) -> Self {
         let comparator = thread_rng().gen_range(0usize..3);

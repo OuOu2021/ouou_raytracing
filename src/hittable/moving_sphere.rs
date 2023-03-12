@@ -1,11 +1,7 @@
-use std::ops::Range;
+use crate::aabb::surrounding_box;
 
-use crate::{
-    aabb::{surrounding_box, AABB},
-    hittable::*,
-    material::Material,
-    vec3::*,
-};
+use super::{sphere::Sphere, *};
+
 pub struct MovingSphere {
     center: (Point3, Point3),
     radius: f64,
@@ -56,7 +52,8 @@ impl Hittable for MovingSphere {
             let t = root;
             let p = ray_in.at(t);
             let outward_normal = (p - center) / self.radius;
-            let mut ans = HitRecord::new(p, outward_normal, t, self.material.as_ref());
+            let uv = Sphere::get_sphere_uv(Point3::new(0., 0., 0.) + outward_normal);
+            let mut ans = HitRecord::new(p, outward_normal, t, self.material.as_ref(), uv);
             ans.set_face_normal(ray_in, outward_normal);
             Some(ans)
         }

@@ -361,7 +361,9 @@ in one weekend 的问题：
 
 ![](products\moving_shpere.png)
 
-## BVH(Bounding Volume Hierarchies) 层次包围盒 
+## BVH(Bounding Volume Hierarchies) 层次包围盒
+>[层次包围盒- Raytracing The Next Week](https://zhuanlan.zhihu.com/p/77261149) 
+
 计算光线与物体相交这个过程是光线追踪的主要时间性能瓶颈。每次发射光线后，运算时间与物体数目线性正相关。用层次包围盒实现类似二分查找效果。
 
 (今天还看了`SIMD`相关资料，之前还学习了充分利用了并行和`SIMD`的`ndarray`库，以后可以用它替代自己的`Vec3`。当然现在没必要过早优化)
@@ -379,8 +381,9 @@ in one weekend 的问题：
    2. 为其实现`Hittable Trait`
 
 #### 实现&修bug
-* 因为树形结构的所有权问题，不能再使用`Box`或者普通引用，于是全部使用了引用计数智能指针，又因为要并行处理，于是采用`Arc`。并把前面`HittableList`中的`Box`也改成了`Arc`
-* 改进了测试流程，将测试装入`Tests`测试模块而不是在`main`里折腾
+* 因为`BVH`树形结构的所有权问题较为复杂，难以再使用`Box`或者普通引用。于是全部重构成了使用引用计数智能指针（理论上还是可以使用Box的，只是可读性会差一下）。又因为要并行处理，于是采用`Arc`。并把前面`HittableList`中的`Box`也改成了`Arc`
+  * 意外发现Box版本和Arc版本的性能并没有相差很多。所以还是**不要过早优化呀**
+* 改进了测试流程，将测试装入`tests`测试模块而不是在`main`里折腾
   * 只是在测试中输出错误信息需要写`$env:RUST_TEST_NOCAPTURE=1`
 * 浮点数`sort`需要`sort_by`传入调用`partial_cmp`的闭包(并在里面处理错误)，而不能直接排序
 * 面对成吨的`Option`，善用`if let`可以让代码不那么啰嗦
@@ -394,4 +397,34 @@ in one weekend 的问题：
 减少了一半用时，且物体越多优化效果会越明显
 
 ### 小结
-这是到目前为止最大的一个挑战
+这是到目前为止最大的一个挑战，之前没有用`Rust`实现过树形结构，现在通过实现`BVH`这个只读的树形结构，加深了对`Rust`智能指针的理解
+
+## Solid Textures 固体材质
+将材质贴图/颜色信息映射到形状上
+
+### 抽象材质：Texture Trait
+需要实现通过一个uv坐标确定一个颜色(`Color3`)
+
+### 实现第一个材质：纯色材质 Constant Texture
+
+### 球体的uv坐标
+通过极坐标系(只有一个面，所以只需要仰角和方位角两个坐标，而不需要使用球极坐标系)将球上一个点与贴图平面上的一个点一一对应：
+* 计算$(\theta, \phi)$, 其中 $\theta$ 是从南极点往上的仰角，范围$[0,\pi]$; $\phi$ 是绕Y轴的方位角，范围$[0, 2\pi]$ (from -X to +Z to +X to -Z back to -X)
+* 将$\theta$与$\phi$映射到平面坐标系上: $$u=\frac \phi {2\pi},\qquad v= \frac \theta \pi, u,v \in [0,1]$$
+* 为了计算以原点为球心的单位球体的$\theta$和$\phi$，我们需要从三维笛卡尔坐标系上一点开始计算：
+  $$y=−\cos(\theta) \\
+  x=−\cos(\phi)\sin(\theta) \\
+  z=\sin(\phi)\sin(\theta)$$
+
+### Checker Texture
+棋盘一样的双纯色材质，根据 $$\sin(10\cdot p.x()) \times \sin(10\cdot p.y())\times \sin(10\cdot p.z())$$ 的正负性来在3D面上生成Checker材质
+
+### 实现细节
+* 进一步改进了测试流程，具体如下
+  * 之前不小心使用了集成测试，放在项目目录`/tests`下，本质上是在`crate`的外部对整个`crate`进行测试，并太适合我实际上的测试内容。
+  * 于是改成了单元测试，放在`/src/test`模块中，测试代码并会不对外公开(暴露)。
+  * 测试图片统一放至`/imgs/test`，并以测试函数名来命名(`Rust`没有反射，暂时也没有像`C/C++`一样的`__func__`官方宏来输出当前函数名，所以只能利用第三方库`function_name`来获取当前函数名)
+  * 缩小了测试图片的输出分辨率，减少出射递归层数，提高测试效率
+
+### 成果
+![](imgs\test\render_scene_with_checker.png)
