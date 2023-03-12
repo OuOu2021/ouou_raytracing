@@ -23,9 +23,9 @@ Learning the second part now.
 >
 > 二冊目を勉強している。
 ## Some Results
-![Final output of the first part](products\in_one_weekend\final_firstbook.png)
+![Final output of the first part](.\products\in_one_weekend\final_firstbook.png)
 
-![Checker texture](imgs\test\render_scene_with_checker.png)
+![Checker texture](.\imgs\test\render_scene_with_checker.png)
 
 ## References
 > 参考资料
