@@ -2,9 +2,6 @@
 用Rust实现，记录对the book的学习理解进程，与对Rust特性的学习探索有感
 
 ## References
-[the book](https://raytracing.github.io/)
-[Ray Tracing in One Weekend 超详解](https://www.cnblogs.com/lv-anchoret)
-[难点总结](https://blog.csdn.net/qq_41655612/article/details/127645259)
 [用CUDA进行GPU加速计算](https://zhuanlan.zhihu.com/p/481545755)
 [用CUDA进行GPU加速计算 英文原文](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/)
 [光追资料收集](https://www.bilibili.com/read/cv2317592/)
@@ -359,7 +356,7 @@ in one weekend 的问题：
 
 以普通球体为基础写出`hit`。光线与球体相交时只考虑光线出现时间对应的球心位置，相当于只是用两点确定球的直线路径，而非只在该时间范围内存在
 
-![](products\moving_shpere.png)
+![](products\the_next_week\moving_shpere.png)
 
 ## BVH(Bounding Volume Hierarchies) 层次包围盒
 >[层次包围盒- Raytracing The Next Week](https://zhuanlan.zhihu.com/p/77261149) 
@@ -425,6 +422,9 @@ in one weekend 的问题：
   * 于是改成了单元测试，放在`/src/test`模块中，测试代码并会不对外公开(暴露)。
   * 测试图片统一放至`/imgs/test`，并以测试函数名来命名(`Rust`没有反射，暂时也没有像`C/C++`一样的`__func__`官方宏来输出当前函数名，所以只能利用第三方库`function_name`来获取当前函数名)
   * 缩小了测试图片的输出分辨率，减少出射递归层数，提高测试效率
+* 还改进了项目结构，增加了一些模块层次(`hittable`,`material`,`textures`,`test`)让项目代码更清晰(`use`暂时比较杂乱，以 后再整理)
 
 ### 成果
 ![](imgs\test\render_scene_with_checker.png)
+
+## Perlin Noise 柏林噪音
