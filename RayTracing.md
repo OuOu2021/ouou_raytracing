@@ -3,11 +3,17 @@
 
 ## References
 [用CUDA进行GPU加速计算](https://zhuanlan.zhihu.com/p/481545755)
+
 [用CUDA进行GPU加速计算 英文原文](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/)
+
 [光追资料收集](https://www.bilibili.com/read/cv2317592/)
+
 [计算机图形学入门资料合集](https://blog.csdn.net/weixin_31226805/article/details/111969351?ops_request_misc=&request_id=&biz_id=102&utm_term=Ray%20Tracing%20in%20one%20weekend%20CUD&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-5-111969351.142^v70^wechat_v2,201^v4^add_ask)
+
 [从光线追踪到路径追踪](https://zhuanlan.zhihu.com/p/138317358)
+
 [总结《Ray Tracing from the Ground Up》](https://blog.csdn.net/libing_zeng/article/details/72625390)
+
 [光栅渲染器学习总结博客](https://zhuanlan.zhihu.com/p/141210744)
 
 ## Output an Image
@@ -55,12 +61,11 @@ r g b
   >[Must a const fn behave exactly the same at runtime as at compile-time?](https://github.com/rust-lang/rust/issues/77745)
 * 敬佩Rust社区的严谨态度，但我没有时间深究这些`issues`, `unstable`和`experimental`了，最后还是放弃了使用过多的编译期计算
 
-线性混合公式(Blend)：$$blendedValue=(1−t)\cdot startValue+t\cdot endValue$$
-(其实就是二维线性插值)
+线性混合公式(Blend)(其实就是二维线性插值)：
 
-`ray_color()`利用混合公式线性地将白色与天蓝色混合
+$$blendedValue=(1−t)\cdot startValue+t\cdot endValue$$
 
-主要以下几步:
+`ray_color()`利用混合公式线性地将白色与天蓝色混合，主要以下几步:
 
 1. 确定分辨率: 假定宽度400,比例16:9
 2. 确定坐标映射系统，场景左下角为(-2,-1,-1)，右上角为(2,1,-1)，中点为(0,0,-1)；摄影机(0,0,0)
@@ -75,9 +80,9 @@ r g b
 计算光线有没有击中一个球体很简单，所以一般都用球体测试光追
 
 #### 判断光与球相交
-设P为一个坐标点，C为球心坐标$\vec P=(x,y,z), \vec C =(C_x,C_y,C_z)$，则P在C球面上的公式为：
+设P为一个坐标点，C为球心坐标 $\vec P=(x,y,z), \vec C =(C_x,C_y,C_z)$ ，则P在C球面上的公式为：
 $$(\vec P−\vec C)⋅(\vec P−\vec C)=r^2$$
-若P为光线上的点$\vec P(t)=\vec A+t\vec b$,则：
+若P为光线上的点 $\vec P(t)=\vec A+t\vec b$ ,则：
 $$(\vec P(t )−\vec C)⋅(\vec P(t)−\vec C)=r^2$$
 或者把光线函数扩展为点向式:
 $$(\vec A+t\vec b−\vec C)⋅(\vec A+t\vec b−\vec C)=r^2$$
@@ -91,7 +96,7 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 没有着色，也没有反射的球图像
 ![](imgs/2023-01-05-19-25-51.png)
 
-还有个bug(特性😅)是判断球时t的解可以为负数，所以如果把球z坐标改成-1你仍然可以看到你背后的球
+还有个bug(特性😅)是判断球时t的解可以为负数，所以如果把球z坐标改成`-1`你仍然可以看到你背后的球
 
 ### Surface Normals and Multiple Objects
 #### 用表面法线着色
@@ -181,8 +186,8 @@ metal:
 2. 红绿蓝衰减程度不同，使不同金属呈现不同颜色。用参数自由确定
 
 ![](imgs/2023-01-11-23-23-22.png)
-由于我们的法向量是单位向量，所以$|\vec b| = \vec v * \vec n$
-公式: 出射光线$\vec o = \vec v - 2\vec n \times (\vec v\cdot \vec n)$
+由于我们的法向量是单位向量，所以 $|\vec b| = \vec v * \vec n$
+公式: 出射光线 $\vec o = \vec v - 2\vec n \times (\vec v\cdot \vec n)$
 
 ##### 实现细节
 实现了`Material trait`的`struct`是一种材料，它的`scatter`方法可以通过`入射光`与`HitRecord`确定出射光与其颜色。通过前述方法分别实现`Lambertian`与`Matel`
@@ -209,24 +214,37 @@ Dielectrics：电介质，如空气、玻璃、水、钻石。
 光击中电介质表面时既会折射进入介质，又会反射而离开介质，但我们的一束光线只能选择其一，所以我们随机选择折射或反射之一作为散射方式，经过多次取样的平均，最终效果相同
 
 #### 折射
-斯涅尔定律(Snell's Law，折射定律)：$$\eta_1\sin \theta_1 = \eta_2\sin \theta_2$$ 其中$\theta_1$为入射角，$\theta_2$为折射角，$\eta_1$ $\eta_2$分别是两种介质的折射率($\geq 1$)
+斯涅尔定律(Snell's Law，折射定律)：
+$$\eta_1\sin \theta_1 = \eta_2\sin \theta_2$$
+
+其中 $\theta_1$ 为入射角， $\theta_2$ 为折射角， $\eta_1$  $\eta_2$ 分别是两种介质的折射率( $\geq 1$ )
 ![](imgs/2023-01-12-12-46-33.png)
 玻璃1.3~1.7，钻石2.4
 
-计算折射角：$$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
+计算折射角：
 
-首先入射光、法线、折射光、(反射光)都在一个平面内。我们可以在平面上将折射光`R'`分解成两个垂直的部分来计算 $$\vec R'=\vec {R'_\perp}+\vec {R'_\parallel}$$
+$$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
 
-可以解出 $$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+\cos \theta_1 \vec n),$$$$\vec {R'_\parallel} = - \sqrt{1- |\vec {R'_\perp}|^2}\vec n,$$
+首先入射光、法线、折射光、(反射光)都在一个平面内。我们可以在平面上将折射光`R'`分解成两个垂直的部分来计算 
 
-其中$\cos \theta = \frac {\vec a \cdot \vec b} {|\vec a| |\vec b|}$，可将公式化为
+$$\vec R'=\vec {R'_\perp}+\vec {R'_\parallel}$$
+
+可以解出 
+
+$$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+\cos \theta_1 \vec n),$$
+
+$$\vec {R'_\parallel} = - \sqrt{1- |\vec {R'_\perp}|^2}\vec n,$$
+
+其中 $\cos \theta = \frac {\vec a \cdot \vec b} {|\vec a| |\vec b|}$ ，可将公式化为
 
 $$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+(-\vec R \cdot \vec n)\vec n)$$
 
 #### 全反射
 全反射与临界角：折射率太大会导致Snell's Law没有实根，即没有折射可能，只会反射，这就是全反射。折射角公式：
+
 $$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
-公式中如果$\eta_1=1.5, \eta_2=1.0, \sin \theta_1>\frac 2 3$时$\sin \theta_1>1$，折射角无解,发生全反射
+
+公式中如果 $\eta_1=1.5, \eta_2=1.0, \sin \theta_1>\frac 2 3$ 时 $\sin \theta_1>1$ ，折射角无解,发生全反射
 
 #### Schlick Approximation
 现在我们的电介质要么只折射光线，要么只全反射光线。实际上的电介质根据入射角度会有不同的折射与反射比例，而不是二者只择其一。
@@ -247,7 +265,7 @@ FOV横向和纵向不同，以横向为基准，纵向对横向乘一个洗漱�
 先让相机对准z轴负方向，h作为向量与z轴的距离
 
 ![](imgs/2023-01-13-19-18-32.png)
-(图片不够直观，$\theta$视场角是两倍与z轴的夹角，所以计算tan要除以2,$h = \tan {(\frac \theta 2)}$)
+(图片不够直观， $\theta$ 视场角是两倍与z轴的夹角，所以计算tan要除以2, $h = \tan {(\frac \theta 2)}$ )
 
 #### Positioning and Orienting the Camera
 `look_from`点到`look_at`点，加上`view_up`代表相机指向上方方向的向量，确定了一个相机的位置、朝向与旋转角度；再加上之前的视场角`vfov`就能确定获取图像的范围
@@ -406,15 +424,23 @@ in one weekend 的问题：
 
 ### 球体的uv坐标
 通过极坐标系(只有一个面，所以只需要仰角和方位角两个坐标，而不需要使用球极坐标系)将球上一个点与贴图平面上的一个点一一对应：
-* 计算$(\theta, \phi)$, 其中 $\theta$ 是从南极点往上的仰角，范围$[0,\pi]$; $\phi$ 是绕Y轴的方位角，范围$[0, 2\pi]$ (from -X to +Z to +X to -Z back to -X)
-* 将$\theta$与$\phi$映射到平面坐标系上: $$u=\frac \phi {2\pi},\qquad v= \frac \theta \pi, u,v \in [0,1]$$
-* 为了计算以原点为球心的单位球体的$\theta$和$\phi$，我们需要从三维笛卡尔坐标系上一点开始计算：
-  $$y=−\cos(\theta) \\
-  x=−\cos(\phi)\sin(\theta) \\
-  z=\sin(\phi)\sin(\theta)$$
+* 计算 $(\theta, \phi)$ , 其中 $\theta$ 是从南极点往上的仰角，范围 $[0,\pi]$ ;  $\phi$  是绕Y轴的方位角，范围 $[0, 2\pi]$  (from -X to +Z to +X to -Z back to -X)
+* 将 $\theta$ 与 $\phi$ 映射到平面坐标系上: 
+
+$$u=\frac \phi {2\pi},\qquad v= \frac \theta \pi, u,v \in [0,1]$$
+
+* 为了计算以原点为球心的单位球体的 $\theta$ 和 $\phi$ ，我们需要从三维笛卡尔坐标系上一点开始计算：
+
+$$y=−\cos(\theta) \\
+x=−\cos(\phi)\sin(\theta) \\
+z=\sin(\phi)\sin(\theta)$$
 
 ### Checker Texture
-棋盘一样的双纯色材质，根据 $$\sin(10\cdot p.x()) \times \sin(10\cdot p.y())\times \sin(10\cdot p.z())$$ 的正负性来在3D面上生成Checker材质
+棋盘一样的双纯色材质，根据 
+
+$$\sin(10\cdot p.x()) \times \sin(10\cdot p.y())\times \sin(10\cdot p.z())$$ 
+
+的正负性来在3D面上生成Checker材质
 
 ### 实现细节
 * 进一步改进了测试流程，具体如下
