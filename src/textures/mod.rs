@@ -5,4 +5,5 @@ pub trait Texture: Send + Sync {
 }
 
 pub mod checker_texture;
+pub mod image_texture;
 pub mod solid_color;

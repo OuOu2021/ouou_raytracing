@@ -4,7 +4,11 @@ use crate::test::test_render_random_scene;
 #[test]
 #[named]
 fn render_scene_with_checker() {
-    test_render_random_scene(&random_scene_with_checker(), &function_name!());
+    test_render_random_scene(
+        Default::default(),
+        &random_scene_with_checker(),
+        &function_name!(),
+    );
 }
 
 fn random_scene_with_checker() -> BvhNode {

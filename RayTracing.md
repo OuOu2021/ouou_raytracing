@@ -454,3 +454,13 @@ $$\sin(10\cdot p.x()) \times \sin(10\cdot p.y())\times \sin(10\cdot p.z())$$
 ![](imgs\test\render_scene_with_checker.png)
 
 ## Perlin Noise 柏林噪音
+
+## Image Texture Mapping 图像材质映射
+和噪声纹理相比，显然能显示一个地球仪更加有趣，所以先看这章吧。
+
+为了实现与不同图像分辨率的兼容性，通常把uv坐标先映射到一个图像位置的比值而非具体的一个像素点。对于 $N_x \times N_y$ 图像像素点`(i,j)`:
+$$u = \frac i {N_x-1}, v = \frac j {N_y-1}$$
+
+## 存储材质图像数据
+图像解析采用`image crate`，存储使用其中的`DynamicImage`，它采用的是`RGBA`四维度存储，但也能兼容`JPG`
+

@@ -20,28 +20,25 @@ pub struct Camera {
     time: Range<f64>,
 }
 
-/*
 impl Default for Camera {
     fn default() -> Self {
-        const ASPECT_RATIO: f64 = 16. / 9.;
-        const VIEWPORT_HEIGHT: f64 = 2.0;
-        const VIEWPORT_WIDTH: f64 = ASPECT_RATIO * VIEWPORT_HEIGHT;
-        // 焦平面到摄像机的距离
-        const FOCAL_LENGTH: f64 = 1.0;
-        let origin = Point3::zero();
-        let horizontal = Vec3::new(VIEWPORT_WIDTH, 0., 0.);
-        let vertical = Vec3::new(0., VIEWPORT_HEIGHT, 0.);
-        Self {
-            origin,
-            horizontal,
-            vertical,
-            lower_left_corner: Point3(
-                origin.0 - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., FOCAL_LENGTH),
-            ),
-        }
+        let look_from = Point3::new(13., 2.0, 5.);
+        let look_at = Point3::new(0., 0., 0.);
+        let vup = Vec3::new(0., 1., 0.);
+        let dist_to_focus = 10.0;
+        let aperture = 0.1;
+
+        Self::new(
+            (look_from, look_at),
+            vup,
+            20.,
+            16. / 9.,
+            aperture,
+            dist_to_focus,
+            0.0..1.0,
+        )
     }
 }
-*/
 
 impl Camera {
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {
@@ -58,8 +55,8 @@ impl Camera {
     }
 
     pub fn new(
-        look_from: Point3,
-        look_at: Point3,
+        // from->at
+        look: (Point3, Point3),
         view_up: Vec3,
         // vertical field-of-view in degrees
         vfov: f64,
@@ -74,12 +71,12 @@ impl Camera {
         let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
 
-        let w = (look_from - look_at).to_unit();
+        let w = (look.0 - look.1).to_unit();
         let u = view_up.cross_mul(w).to_unit();
         let v = w.cross_mul(u);
 
         //let focal_length = 1.;
-        let origin = look_from;
+        let origin = look.0;
         let horizontal = viewport_width * u * focus_dist;
         let vertical = viewport_height * v * focus_dist;
         let lower_left_corner = Point3(origin.0 - horizontal / 2. - vertical / 2. - w * focus_dist);

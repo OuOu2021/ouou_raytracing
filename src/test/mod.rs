@@ -17,7 +17,7 @@ use rand::{random, thread_rng, Rng};
 use rayon::prelude::*;
 use std::{ops::Add, sync::Arc, time::SystemTime};
 
-pub fn test_render_random_scene(world: &dyn Hittable, func_name: &str) {
+pub fn test_render_random_scene(cam: Camera, world: &dyn Hittable, func_name: &str) {
     // 初始化
     eprintln!("Start Initializing");
     let mut _rng = thread_rng();
@@ -30,24 +30,6 @@ pub fn test_render_random_scene(world: &dyn Hittable, func_name: &str) {
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32; //225
     const SAMPLE_PER_PIXEL: u32 = 100;
     const MAX_DEPTH: u32 = 50;
-
-    // Camera
-    let look_from = Point3::new(13., 2.0, 5.);
-    let look_at = Point3::new(0., 0., 0.);
-    let vup = Vec3::new(0., 1., 0.);
-    let dist_to_focus = 10.0;
-    let aperture = 0.1;
-
-    let cam = Camera::new(
-        look_from,
-        look_at,
-        vup,
-        20.,
-        ASPECT_RATIO,
-        aperture,
-        dist_to_focus,
-        0.0..1.0,
-    );
 
     // Render
     eprintln!("Start Rendering");
@@ -96,3 +78,6 @@ mod test_bvh;
 
 #[cfg(test)]
 mod test_checker;
+
+#[cfg(test)]
+mod test_image_texture;

@@ -26,7 +26,7 @@ impl Sphere {
         //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
         let theta = (-p.y()).acos();
         let phi = (-p.z()).atan2(p.x()) + PI;
-        (phi / 2. * PI, theta / PI)
+        (phi / (2. * PI), theta / PI)
     }
 }
 

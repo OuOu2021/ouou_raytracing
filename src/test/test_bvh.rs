@@ -5,7 +5,7 @@ use super::*;
 #[test]
 #[named]
 fn render_scene_with_bvh() {
-    test_render_random_scene(&bvh_random_scene(), &function_name!());
+    test_render_random_scene(Default::default(), &bvh_random_scene(), &function_name!());
 }
 
 fn bvh_random_scene() -> BvhNode {
