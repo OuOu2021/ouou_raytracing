@@ -390,3 +390,11 @@ impl IndexMut<usize> for Point3 {
         &mut self.0[index]
     }
 }
+
+impl Mul<f64> for Point3 {
+    type Output = Point3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Point3::new(self.0[0] * rhs, self.0[1] * rhs, self.0[2] * rhs)
+    }
+}

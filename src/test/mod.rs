@@ -73,11 +73,10 @@ pub fn test_render_random_scene(cam: Camera, world: &dyn Hittable, func_name: &s
     );
 }
 
-#[cfg(test)]
 mod test_bvh;
 
-#[cfg(test)]
 mod test_checker;
 
-#[cfg(test)]
 mod test_image_texture;
+
+mod test_perlin;

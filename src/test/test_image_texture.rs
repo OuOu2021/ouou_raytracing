@@ -28,7 +28,7 @@ fn cam() -> Camera {
 
 fn earth() -> HittableList {
     let earth_texture = Arc::new(ImageTexture::from_img("res/earthmap.jpg"));
-    let earth_surface = Box::new(Lambertian::with_texture(earth_texture));
+    let earth_surface = Arc::new(Lambertian::with_texture(earth_texture));
     let globe = Sphere::new(Point3::zero(), 2., earth_surface);
     let mut list = HittableList::new();
     list.add(Arc::new(globe));
