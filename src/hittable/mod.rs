@@ -53,5 +53,7 @@ pub trait Hittable: Sync + Send {
 
 pub mod bvh;
 pub mod hittable_list;
+pub mod instances;
 pub mod moving_sphere;
+pub mod rect;
 pub mod sphere;

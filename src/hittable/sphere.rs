@@ -4,7 +4,7 @@ use crate::{aabb::AABB, hittable::*, material::Material, vec3::*};
 pub struct Sphere {
     center: Point3,
     radius: f64,
-    material: Arc<dyn Material + Send + Sync>,
+    material: Arc<dyn Material>,
 }
 
 impl Sphere {

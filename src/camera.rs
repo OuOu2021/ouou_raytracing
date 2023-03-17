@@ -18,6 +18,7 @@ pub struct Camera {
     _w: Vec3,
     // shutter and close
     time: Range<f64>,
+    aspect_ratio: f64,
 }
 
 impl Default for Camera {
@@ -92,6 +93,10 @@ impl Camera {
             _w: w,
             lens_radius,
             time,
+            aspect_ratio,
         }
+    }
+    pub fn get_aspect_ratio(&self) -> f64 {
+        self.aspect_ratio
     }
 }

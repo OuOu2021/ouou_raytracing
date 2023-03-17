@@ -280,6 +280,12 @@ impl Color {
     }
 }
 
+impl Default for Color {
+    fn default() -> Self {
+        Color::black()
+    }
+}
+
 impl Mul<f64> for Color {
     type Output = Color;
 

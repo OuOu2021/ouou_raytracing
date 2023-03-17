@@ -43,11 +43,12 @@ impl Perlin {
         let (i, j, k) = (floor(p.x()), floor(p.y()), floor(p.z()));
 
         // 获取周围八个晶格点，哈希到随机向量范围之内
-        let mask = |x: i32,i: usize| self.perm[i][(x & 255) as usize];
+        let mask = |x: i32, i: usize| self.perm[i][(x & 255) as usize];
         let c: [[[Vec3; 2]; 2]; 2] = from_fn(|di| {
             from_fn(|dj| {
                 from_fn(|dk| {
-                    self.rand_vec[mask(i + di as i32, 0) ^ mask(j + dj as i32, 1) ^ mask(k + dk as i32, 2)]
+                    self.rand_vec
+                        [mask(i + di as i32, 0) ^ mask(j + dj as i32, 1) ^ mask(k + dk as i32, 2)]
                 })
             })
         });
@@ -88,7 +89,7 @@ fn perlin_interpolation(c: [[[Vec3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
 
     // ?
     let f2 = |x, y| x as f64 * y + (1. - x as f64) * (1. - y);
-    
+
     // 遍历三维中相邻的八个晶格点
     (0..2)
         .map(|i| {
@@ -129,7 +130,7 @@ impl Default for NoiseTexture {
     fn default() -> Self {
         Self {
             noise: Perlin::new(),
-            scale: 1.0,
+            scale: 4.0,
         }
     }
 }

@@ -40,7 +40,7 @@ impl Ray {
 }
 
 /// 接受光线，计算光线打在视口上的颜色
-pub fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
+pub fn ray_color(r_in: &Ray, background: Color, world: &dyn Hittable, depth: u32) -> Color {
     // 超过反射次数限制，返回黑色
     if depth == 0 {
         return Color::black();
@@ -48,12 +48,14 @@ pub fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
 
     // 左边界0.001而非0是为了避免误差导致射中物体内部
     if let Some(rec) = world.hit(r_in, &(0.001..INFINITY)) {
+        let emitted = rec.material.emitted(rec.texture_uv, rec.p);
         if let Some((scattered, attenuation)) = rec.material.scatter(r_in, &rec) {
-            attenuation * ray_color(&scattered, world, depth - 1)
+            emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
         } else {
-            Color::black()
+            emitted
         }
     } else {
+        /*
         // 标准化
         let unit_direction = r_in.direction().to_unit();
 
@@ -62,5 +64,7 @@ pub fn ray_color(r_in: &Ray, world: &dyn Hittable, depth: u32) -> Color {
 
         // Blend 公式 天蓝色和白色混合，其实就是二维线性插值
         (1. - t) * Color(Vec3::new(1., 1., 1.)) + t * Color(Vec3::new(0.5, 0.7, 1.))
+        */
+        background
     }
 }

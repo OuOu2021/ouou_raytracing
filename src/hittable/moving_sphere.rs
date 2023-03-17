@@ -5,7 +5,7 @@ use super::{sphere::Sphere, *};
 pub struct MovingSphere {
     center: (Point3, Point3),
     radius: f64,
-    material: Arc<dyn Material + Send + Sync>,
+    material: Arc<dyn Material>,
     time: Range<f64>,
 }
 
@@ -13,7 +13,7 @@ impl MovingSphere {
     pub fn new(
         center: (Point3, Point3),
         radius: f64,
-        material: Arc<dyn Material + Send + Sync>,
+        material: Arc<dyn Material>,
         time: Range<f64>,
     ) -> Self {
         Self {
