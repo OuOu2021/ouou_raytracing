@@ -54,16 +54,19 @@ impl Perlin {
         perlin_interpolation(c, u, v, w)
     }
     /// 搅动
-    pub fn turb_with_depth(&self, p: &Point3, depth: usize) -> f64{
-        let mut tmp_p = p.clone() * 0.5;
+    pub fn turb_with_depth(&self, p: &Point3, depth: usize) -> f64 {
+        let mut tmp_p = *p * 0.5;
         let mut weight = 2.;
-        (0..depth).map(|_|{
-            weight*=0.5;
-            tmp_p=tmp_p*2.;
-            weight*self.noise(&tmp_p)
-        }).sum::<f64>().abs()
+        (0..depth)
+            .map(|_| {
+                weight *= 0.5;
+                tmp_p = tmp_p * 2.;
+                weight * self.noise(&tmp_p)
+            })
+            .sum::<f64>()
+            .abs()
     }
-    pub fn turb(&self, p: &Point3) -> f64{
+    pub fn turb(&self, p: &Point3) -> f64 {
         self.turb_with_depth(p, 7)
     }
 }
@@ -131,6 +134,6 @@ impl Default for NoiseTexture {
 impl Texture for NoiseTexture {
     fn value(&self, _uv: (f64, f64), p: Point3) -> Color {
         // 0.5*(1+x) 把-1~1的x转换到0~1之间，防止GAMMA的sqrt出现NaN
-        Color::new(1., 1., 1.) * self.noise.turb(&(p*self.scale))
+        Color::new(1., 1., 1.) * 0.5 * (1. + (p.z() * self.scale + 10. * self.noise.turb(&p)).sin())
     }
 }
