@@ -2,6 +2,18 @@ use std::sync::Arc;
 
 use crate::{aabb::surrounding_box, hittable::*, ray::Ray};
 
+#[macro_export]
+macro_rules! hittablelist {
+    ($($x:expr),+ $(,)?) => {
+        {
+            let mut tmp_list = HittableList::new();
+            $(
+                tmp_list.add($x);
+            )*
+            tmp_list
+        }
+    };
+}
 pub struct HittableList {
     objects: Vec<Arc<dyn Hittable>>,
 }
