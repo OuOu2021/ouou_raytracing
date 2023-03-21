@@ -5,7 +5,7 @@ use super::*;
 #[test]
 #[named]
 fn render_cornell_box() {
-    test_render_random_scene(
+    test_render(
         Camera::new(
             (
                 Point3::new(278.0, 278.0, -800.0),
@@ -18,6 +18,7 @@ fn render_cornell_box() {
             10.,
             0.0..1.0,
         ),
+        600,
         200,
         Color::black(),
         &generate_box(),

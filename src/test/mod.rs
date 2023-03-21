@@ -17,8 +17,9 @@ use rand::{random, thread_rng, Rng};
 use rayon::prelude::*;
 use std::{ops::Add, sync::Arc, time::SystemTime};
 
-pub fn test_render_random_scene(
+pub fn test_render(
     cam: Camera,
+    image_width: u32,
     sample_per_pixel: u32,
     background: Color,
     world: &dyn Hittable,
@@ -32,8 +33,8 @@ pub fn test_render_random_scene(
     // Image
     // 横纵比
     const MAX_DEPTH: u32 = 50;
-    let image_width = 400.;
-    let image_height = 400. / cam.get_aspect_ratio();
+    let image_width = image_width as f64;
+    let image_height = image_width / cam.get_aspect_ratio();
     let (image_width, image_height) = (image_width as u32, image_height as u32);
     // Render
     eprintln!("Start Rendering");
@@ -41,7 +42,7 @@ pub fn test_render_random_scene(
     let mut img_buf = ImageBuffer::new(image_width, image_height);
     for (i, j, pixel) in img_buf.enumerate_pixels_mut() {
         if j % 30 == 0 && i == 0 {
-            eprintln!("\rScanlines remaining: {} ", image_height - j);
+            eprint!("\rScanlines remaining: {} ", image_height - j);
         }
         let row = image_height - j;
         let pixel_color = (0..sample_per_pixel)

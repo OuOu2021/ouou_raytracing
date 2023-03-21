@@ -5,8 +5,9 @@ use super::*;
 #[test]
 #[named]
 fn render_perlin() {
-    test_render_random_scene(
+    test_render(
         Default::default(),
+        400,
         100,
         Color::new(0.70, 0.80, 1.00),
         &two_perlin_spheres(),

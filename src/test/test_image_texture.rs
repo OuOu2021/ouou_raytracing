@@ -4,8 +4,9 @@ use crate::textures::image_texture::ImageTexture;
 #[test]
 #[named]
 fn render_earth() {
-    test_render_random_scene(
+    test_render(
         cam(),
+        400,
         100,
         Color::new(0.70, 0.80, 1.00),
         &earth(),

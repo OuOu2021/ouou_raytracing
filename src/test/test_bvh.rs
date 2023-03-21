@@ -1,12 +1,13 @@
-use crate::test::test_render_random_scene;
+use crate::test::test_render;
 
 use super::*;
 
 #[test]
 #[named]
 fn render_scene_with_bvh() {
-    test_render_random_scene(
+    test_render(
         Default::default(),
+        400,
         100,
         Color::new(0.70, 0.80, 1.00),
         &bvh_random_scene(),

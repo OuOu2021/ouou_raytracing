@@ -8,7 +8,7 @@ use super::*;
 #[test]
 #[named]
 fn render_light() {
-    test_render_random_scene(
+    test_render(
         Camera::new(
             (Point3::new(26., 3.0, 6.), Point3::new(0., 0., 0.)),
             Vec3::new(0., 1., 0.),
@@ -18,6 +18,7 @@ fn render_light() {
             10.,
             0.0..1.0,
         ),
+        800,
         400,
         Color::black(),
         &simple_light(),

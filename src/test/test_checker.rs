@@ -1,11 +1,12 @@
 use super::*;
-use crate::test::test_render_random_scene;
+use crate::test::test_render;
 
 #[test]
 #[named]
 fn render_scene_with_checker() {
-    test_render_random_scene(
+    test_render(
         Default::default(),
+        400,
         100,
         Color::new(0.70, 0.80, 1.00),
         &random_scene_with_checker(),
