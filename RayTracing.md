@@ -527,3 +527,78 @@ $$u = \frac i {N_x-1}, v = \frac j {N_y-1}$$
 
 ### Instances
 `CornellBox`里加两个经典立方体
+
+### 性能分析及优化
+装了`Win11`就忍不住摆弄`WSL2`，于是想试试用`perf`之类的来分析性能。找到了不错的东西：
+* crates:`Criterion`、`Flamegraph`
+* Hotspot(Qt写的火焰图生成)
+也踩了亿些坑，主要是在自己编译`perf`过程中
+
+>[Rust性能评估与调优实践 - Rust精选 (rustmagazine.github.io)](https://rustmagazine.github.io/rust_magazine_2021/chapter_12/rust-perf.html)
+>
+>[with the linux perf tool - Rust Compiler Development Guide (rust-lang.org)](https://rustc-dev-guide.rust-lang.org/profiling/with_perf.html)
+
+#### 学习使用Criterion进行benchmark
+
+#### 学习使用FlameGraph生成火焰图（stuck）
+
+#### perf WSL2 踩坑记
+##### 编译perf
+```bash
+Warning: Kernel ABI header at 'tools/arch/x86/include/asm/cpufeatures.h' differs from latest version at 'arch/x86/include/asm/cpufeatures.h'
+diff -u tools/arch/x86/include/asm/cpufeatures.h arch/x86/include/asm/cpufeatures.h
+Warning: Kernel ABI header at 'tools/arch/x86/include/asm/msr-index.h' differs from latest version at 'arch/x86/include/asm/msr-index.h'
+diff -u tools/arch/x86/include/asm/msr-index.h arch/x86/include/asm/msr-index.h
+Warning: Kernel ABI header at 'tools/arch/arm64/include/uapi/asm/kvm.h' differs from latest version at 'arch/arm64/include/uapi/asm/kvm.h'
+diff -u tools/arch/arm64/include/uapi/asm/kvm.h arch/arm64/include/uapi/asm/kvm.h
+Makefile.config:454: No libdw DWARF unwind found, Please install elfutils-devel/libdw-dev >= 0.158 and/or set LIBDW_DIR
+Makefile.config:459: No libdw.h found or old libdw.h found or elfutils is older than 0.138, disables dwarf support. Please install new elfutils-devel/libdw-dev
+Makefile.config:587: DWARF support is off, BPF prologue is disabled
+Makefile.config:595: No sys/sdt.h found, no SDT events are defined, please install systemtap-sdt-devel or systemtap-sdt-dev
+Makefile.config:761: slang not found, disables TUI support. Please install slang-devel, libslang-dev or libslang2-dev
+Makefile.config:887: Old version of libbfd/binutils things like PE executable profiling will not be available
+Makefile.config:905: No bfd.h/libbfd found, please install binutils-dev[el]/zlib-static/libiberty-dev to gain symbol demangling
+Makefile.config:949: No libzstd found, disables trace compression, please install libzstd-dev[el] and/or set LIBZSTD_DIR
+Makefile.config:960: No libcap found, disables capability support, please install libcap-devel/libcap-dev
+Makefile.config:973: No numa.h found, disables 'perf bench numa mem' benchmark, please install numactl-devel/libnuma-devel/libnuma-dev
+Makefile.config:1028: No libbabeltrace found, disables 'perf data' CTF format support, please install libbabeltrace-dev[el]/libbabeltrace-ctf-dev
+Makefile.config:1054: No alternatives command found, you need to set JDIR= to point to the root of your Java directory
+
+Auto-detecting system features:
+...                         dwarf: [ OFF ]
+...            dwarf_getlocations: [ OFF ]
+...                         glibc: [ on  ]
+...                        libbfd: [ OFF ]
+...                libbfd-buildid: [ OFF ]
+...                        libcap: [ OFF ]
+...                        libelf: [ on  ]
+...                       libnuma: [ OFF ]
+...        numa_num_possible_cpus: [ OFF ]
+...                       libperl: [ on  ]
+...                     libpython: [ on  ]
+...                     libcrypto: [ on  ]
+...                     libunwind: [ on  ]
+...            libdw-dwarf-unwind: [ OFF ]
+...                          zlib: [ on  ]
+...                          lzma: [ on  ]
+...                     get_cpuid: [ on  ]
+...                           bpf: [ on  ]
+...                        libaio: [ on  ]
+...                       libzstd: [ OFF ]
+...        disassembler-four-args: [ OFF ]
+```
+直接使用的话`C++`和`Rust`都没有`demangle`，且`Rust`数据`flamegraph`crate完全分析不出来，只有个`unknown`。
+
+找到这些库，装完以后再编译才行。
+弄了好久发现没有效果，最后发现把可执行文件放错了位置，`PATH`里有`/usr/bin`和`/usr/local/bin`等多处，而优先调用的是`/usr/local/bin`中的，我放错了所以一直都没用成最新编译的这个。。。
+##### 使用perf监测性能
+* `perf record --call-graph dwarf -g +程序名`：适配Rust的调试信息，生成成吨的data
+* `perf report -demangle`：可以解C++/Rust等的符号，否则函数名不可读
+##### FlameGraph.pl
+`Perl`写的用`perf`数据生成火焰图
+
+##### FlameGraph.rs
+比`perl`的更快，`cargo flamegraph`一键调用
+
+##### Hotspot
+分析`C/Qt/C++`相当好用
