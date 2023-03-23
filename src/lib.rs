@@ -7,7 +7,7 @@ use rand::random;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use vec3::Color;
 
-use crate::{ray::ray_color, color::write_color};
+use crate::{color::write_color, ray::ray_color};
 
 pub mod aabb;
 
@@ -67,7 +67,7 @@ pub fn renderer(
     eprintln!("\nFinish Rendering");
     eprintln!("\nDecoding");
 
-    let path = String::from(output_name)+".png";
+    let path = String::from(output_name) + ".png";
     eprintln!("{}", path);
     img_buf.save(&path).expect("保存失败");
 

@@ -33,15 +33,14 @@ pub fn cornell_box() -> HittableList {
     )));
     objs.add(Arc::new(XzRect::new(0.0..555.0, 0.0, 0.0..555.0, white)));
 
-    /* 
     objs.add(Arc::new(XzRect::new(
-        213.0..343.0,
+        200.0..356.0,
         554.0,
-        227.0..332.0,
+        80.0..332.0,
         light,
     )));
-    */
 
+    /*
     // bigger light
     objs.add(Arc::new(XzRect::new(
         150.0..400.0,
@@ -49,6 +48,7 @@ pub fn cornell_box() -> HittableList {
         150.0..400.0,
         light,
     )));
+    */
 
     objs
 }

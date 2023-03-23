@@ -602,3 +602,6 @@ Auto-detecting system features:
 
 ##### Hotspot
 分析`C/Qt/C++`相当好用
+
+### 旋转
+相比旋转和移动物体，我们选择用相反的角度旋转光线或者给光线相反的位移，叫做`Instance Translation`
