@@ -25,6 +25,9 @@ mod test;
 
 pub type MyResult = Result<(), Box<dyn Error>>;
 
+/// 临时的渲染器
+/// 
+/// 渲染一帧图片，使用并行加速
 pub fn renderer(
     cam: Camera,
     image_width: u32,
@@ -32,7 +35,7 @@ pub fn renderer(
     background: Color,
     world: &dyn Hittable,
     output_name: &str,
-) {
+) -> MyResult{
     // 初始化
     eprintln!("Start Initializing");
     // Image
@@ -57,7 +60,7 @@ pub fn renderer(
                 // gen方法默认就是生成[0,1)的浮点数
                 let u = (i as f64 + random::<f64>()) / (image_width - 1) as f64;
                 let v = (row as f64 + random::<f64>()) / (image_height - 1) as f64;
-                let r = cam.get_ray(u, v);
+                let r = cam.get_ray((u, v));
                 ray_color(&r, background, world, MAX_DEPTH)
             })
             .sum();
@@ -69,7 +72,8 @@ pub fn renderer(
 
     let path = String::from(output_name) + ".png";
     eprintln!("{}", path);
-    img_buf.save(&path).expect("保存失败");
+    img_buf.save(&path)?;
 
     eprintln!("\nDone");
+    Ok(())
 }

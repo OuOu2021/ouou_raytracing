@@ -7,6 +7,9 @@ use crate::{
     vec3::{Point3, Vec3},
 };
 
+/// 相机类
+/// 
+/// 
 pub struct Camera {
     origin: Point3,
     lower_left_corner: Point3,
@@ -42,13 +45,14 @@ impl Default for Camera {
 }
 
 impl Camera {
-    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+    /// 
+    pub fn get_ray(&self, st:(f64, f64)) -> Ray {
         let random_disk = self.lens_radius * Vec3::random_in_unit_disk();
         let offset = self.u * random_disk.x() + self.v * random_disk.y();
 
         Ray::new(
             self.origin + offset,
-            self.lower_left_corner.0 + s * self.horizontal + t * self.vertical
+            self.lower_left_corner.0 + st.0 * self.horizontal + st.1 * self.vertical
                 - self.origin.0
                 - offset,
             thread_rng().gen_range(self.time.clone()),

@@ -11,7 +11,7 @@ use ouou_raytracing::{
     hittablelist,
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     renderer,
-    textures::{image_texture::ImageTexture, perlin_texture::NoiseTexture},
+    textures::{image_texture::ImageTexture},
     vec3::{Color, Point3, Vec3},
 };
 

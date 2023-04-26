@@ -1,6 +1,6 @@
 use crate::{utility::clamp, vec3::*};
 
-pub fn write_color(pixel_color: &Color, samples_per_pixel: u32) -> image::Rgb<u8> {
+pub(crate) fn write_color(pixel_color: &Color, samples_per_pixel: u32) -> image::Rgb<u8> {
     let scale = 1. / samples_per_pixel as f64;
     let (r, g, b) = pixel_color.0.to_tuple();
 

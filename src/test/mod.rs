@@ -52,7 +52,7 @@ pub fn test_render(
                 //gen方法默认就是生成[0,1)的浮点数
                 let u = (i as f64 + thread_rng().gen::<f64>()) / (image_width - 1) as f64;
                 let v = (row as f64 + random::<f64>()) / (image_height - 1) as f64;
-                let r = cam.get_ray(u, v);
+                let r = cam.get_ray((u, v));
                 ray_color(&r, background, world, MAX_DEPTH)
             })
             .sum();
