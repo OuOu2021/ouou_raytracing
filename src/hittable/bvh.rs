@@ -5,7 +5,7 @@ use crate::aabb::surrounding_box;
 use super::{hittable_list::HittableList, *};
 
 /// Bounding Volume Hierarchies 层次包围盒
-/// 
+///
 /// 用于加速计算光线与多个物体组合相交。
 /// 通过划分空间，将$hit()$方法检索n个物体的复杂度从$O(N)$优化至$O(\log N)$
 pub struct BvhNode {

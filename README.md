@@ -22,6 +22,12 @@ Learning the second part now.
 > 正在学习第二本。
 >
 > 二冊目を勉強している。
+
+## Try To Run
+```bash
+cargo test --release checker -- --nocapture
+```
+
 ## Some Results
 ![Final output of the first part](.\products\in_one_weekend\final_firstbook.png)
 

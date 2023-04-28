@@ -26,7 +26,7 @@ mod test;
 pub type MyResult = Result<(), Box<dyn Error>>;
 
 /// 临时的渲染器
-/// 
+///
 /// 渲染一帧图片，使用并行加速
 pub fn renderer(
     cam: Camera,
@@ -35,7 +35,7 @@ pub fn renderer(
     background: Color,
     world: &dyn Hittable,
     output_name: &str,
-) -> MyResult{
+) -> MyResult {
     // 初始化
     eprintln!("Start Initializing");
     // Image
