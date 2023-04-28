@@ -88,3 +88,5 @@ mod test_perlin;
 mod test_light;
 
 mod test_cornell_box;
+
+mod test_medium;

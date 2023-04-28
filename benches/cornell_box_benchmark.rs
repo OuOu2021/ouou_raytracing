@@ -6,12 +6,13 @@ use ouou_raytracing::{
     hittable::{
         hittable_list::HittableList,
         instances::{cornell_box, rect::Rectangular, rotate::RotateY, translate::Translate},
-        sphere::Sphere, moving_sphere::MovingSphere,
+        moving_sphere::MovingSphere,
+        sphere::Sphere,
     },
     hittablelist,
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     renderer,
-    textures::{image_texture::ImageTexture},
+    textures::image_texture::ImageTexture,
     vec3::{Color, Point3, Vec3},
 };
 
@@ -83,7 +84,7 @@ fn generate_box() -> HittableList {
         )),
         Arc::new(Translate::new(
             Arc::new(MovingSphere::new(
-                (Point3::zero(),Point3::new(0.,50.,0.)),
+                (Point3::zero(), Point3::new(0., 50., 0.)),
                 60.,
                 Arc::new(Lambertian::new(Color::new(0.3984375, 0.796875, 0.99))),
                 0.0..1.0
