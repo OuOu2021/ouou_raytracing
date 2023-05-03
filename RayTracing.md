@@ -614,6 +614,11 @@ Auto-detecting system features:
 ### 密度一定的介质 Constant Density Mediums
 进入介质的光可能从内部某点散射，也可能径直穿过介质。根据密度不同这两者的分配情况不同 
 
+## 成果
+![](./imgs/final_2.png)
+![](./imgs/test/render_final_2.png)
+跑了5h+...
+
 ## 重构
 - [x] 把自制的基于`f64`的`Vec3`改为采用`f32`、有`SIMD`优化的[glam crate](https://crates.io/crates/glam)中的`Vec3A`
 
@@ -653,8 +658,3 @@ Auto-detecting system features:
     * OBJ文件格式和tobj可参考[参考资料](https://docs.rs/tobj/3.0.1/tobj/)或自行搜索
   * 实现对简单多边形的渲染
   * 支持obj可以让你最后的大作更精彩哦 :)
-
-## 成果
-![](./imgs/final_2.png)
-![](./imgs/test/render_final_2.png)
-跑了5h+...
