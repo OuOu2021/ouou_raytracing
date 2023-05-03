@@ -37,7 +37,7 @@ impl<'a> HitRecord<'a> {
         }
     }
     pub fn set_face_normal(&mut self, ray_in: &Ray, outward_normal: Vec3) {
-        self.front_face = Some(ray_in.direction().dot_mul(outward_normal) < 0.);
+        self.front_face = Some(ray_in.direction().dot(outward_normal) < 0.);
         self.normal = if self.front_face == Some(true) {
             outward_normal
         } else {

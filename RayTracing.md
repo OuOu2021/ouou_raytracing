@@ -74,12 +74,12 @@ $$blendedValue=(1−t)\cdot startValue+t\cdot endValue$$
 效果：
 ![](./imgs/2023-01-05-17-38-17.png)
 
-### Adding a Sphere
+## Adding a Sphere
 终于要添加真正的物体了！
 
 计算光线有没有击中一个球体很简单，所以一般都用球体测试光追
 
-#### 判断光与球相交
+### 判断光与球相交
 设P为一个坐标点，C为球心坐标 $\vec P=(x,y,z), \vec C =(C_x,C_y,C_z)$ ，则P在C球面上的公式为：
 $$(\vec P−\vec C)⋅(\vec P−\vec C)=r^2$$
 若P为光线上的点 $\vec P(t)=\vec A+t\vec b$ ,则：
@@ -92,23 +92,23 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 
 ![](./imgs/2023-01-05-18-08-52.png)
 
-#### 完成第一幅光追图像
+### 完成第一幅光追图像
 没有着色，也没有反射的球图像
 ![](imgs/2023-01-05-19-25-51.png)
 
 还有个bug(特性😅)是判断球时t的解可以为负数，所以如果把球z坐标改成`-1`你仍然可以看到你背后的球
 
-### Surface Normals and Multiple Objects
-#### 用表面法线着色
+## Surface Normals and Multiple Objects
+### 用表面法线着色
 法线是在相交点上与表面垂直的向量。长度方面，是单位向量的话比较方便着色。方向方面，对球来说向外的法线是交点减去球心
 
 可视化法线的常用技巧是直接把法线方向映射到RGB上。它对单位向量法线来说很简单直观。
 
 ![](imgs/2023-01-05-21-14-43.png)
 
-#### 优化公式
+### 优化公式
 
-#### 抽象出与光线交互的物体Object
+### 抽象出与光线交互的物体Object
 当前球被硬编码到`ray_color`中，难以方便地添加更多物体，所以需要抽象出能与光线交互的物体类。在Rust中是用行为来抽象成Trait，命名为`Hittable`
 
 内含成员函数`hit(r: &ray,t_range: &std::ops::Range<f64>) -> Option<HitRecord>`
@@ -117,25 +117,25 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 
 很容易为球体实现该`Trait`
 
-#### `HittableList`
+### `HittableList`
 存储`Hittables`的集合类型，利用多态，同时存储不同类型的`Hittables`。在Rust中用`Vec<Box<dyn Hitable>>`存储
 
 场景`World`就可以用一个`HittableList`来表示，里面有多个物体，不用每个都分别调用`ray_color`来获取颜色
 
-### Antialiasing 抗锯齿
+## Antialiasing 抗锯齿
 
 真实的相机由于在物体边缘像素同时获取了前景物体光线和背景光线，所以不会有突兀的锯齿，而是过渡柔和自然。我们可以通过在一个像素里混合多份颜色采样来抗锯齿
 
-#### 一些通用函数
+### 一些通用函数
 先写一个`0≤x<1`的随机数生成器，<1很重要。
 用Rust的`rand crate`实现
 
-#### 相机类 & 用多份样本生成像素
+### 相机类 & 用多份样本生成像素
 在光追世界里，相机是用主动发出光线然后获取光线与物体交互信息的形式来模拟真实世界中相机接收光线的。相机需要横纵比，场景范围和起点信息。采用浮点数场景坐标而非像素坐标。可以随意指定像素数量。需要`get_ray`方法来生成光线
 
 在原有像素坐标计算出场景坐标的周围随机生成采样点坐标，进行采样后平均成最终颜色
 
-### Diffuse(Matte) Materials
+## Diffuse(Matte) Materials
 漫反射(无光泽；磨砂)材质特性：
 * 不是像镜面反射一样只呈现出周围环境的颜色，而是用自己固有的颜色来调节这种颜色
 * 对光线吸收率较高，显得较暗
@@ -149,16 +149,16 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 
 反射光线使`ray_color`变为了递归函数，不射到任何物体才会结束递归。所以此外我们还需要限制递归的最大层数
 
-#### 用伽马矫正精确的颜色强度
+### 用伽马矫正精确的颜色强度
 >[优秀参考资料：到底什么是伽马校正 Gamma Correction?](https://zhuanlan.zhihu.com/p/33637724)
 >[简易资料：伽马矫正与LUT](https://blog.csdn.net/dx199771/article/details/111504446)
 
 显示器都假设图像是经过伽马矫正的，所以我们也需要将原始图像进行伽马矫正来得到正常的显示效果。我们选择简易的`gamma 2`,只需对原始颜色(`[0,1)`)开平方根，再映射到`[0,255]`即可
 
-#### Fixing Shadow Acne
+### Fixing Shadow Acne
 为了消除阴影的毛刺，需要忽略t十分接近0(与自己相交)的射线
 
-#### 真正的Lambertian Reflection
+### 真正的Lambertian Reflection
 实现上的区别只是把在球中生成的随机向量单位化了，但具体原理没懂
 
 效果：
@@ -169,8 +169,8 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 * 对于漫反射的物体，它们会显得更浅，这是因为有更多的光反射到相机上。
 * 对于阴影，向上反射的光线较少，因此正处于较小球体下方的大球部分更亮。
 
-### 金属材质&镜面反射 Mirrored Light Reflection
-#### 对材料的抽象
+## 金属材质&镜面反射 Mirrored Light Reflection
+### 对材料的抽象
 材料可以选择和具体物体绑定，也可以不绑定。这里就不绑定了，而是物体持有材质的`Rc`智能指针
 
 材料需要处理两个问题：
@@ -189,7 +189,7 @@ metal:
 由于我们的法向量是单位向量，所以 $|\vec b| = \vec v * \vec n$
 公式: 出射光线 $\vec o = \vec v - 2\vec n \times (\vec v\cdot \vec n)$
 
-##### 实现细节
+#### 实现细节
 实现了`Material trait`的`struct`是一种材料，它的`scatter`方法可以通过`入射光`与`HitRecord`确定出射光与其颜色。通过前述方法分别实现`Lambertian`与`Matel`
 
 问题：漫反射抽象时可能产生的反射光与法线接近反向，加起来接近0导致`NaN`或者`Inf`
@@ -199,10 +199,10 @@ metal:
 
 修复之前`impl Mul<Vec3> for Vec3`的严重bug
 
-#### Fuzzy Reflection 模糊反射
+### Fuzzy Reflection 模糊反射
 现实的金属很难做到像镜子一样精准地反光，而是有一定的模糊效果。对镜面反射出射方向进行少量的随机扰动，获得模糊反射效果
 
-### Dielectrics & Refraction
+## Dielectrics & Refraction
 Dielectrics：电介质，如空气、玻璃、水、钻石。
 
 对于光(属于电磁波)来说，传播不需要任何介质，所以在真空里也可以传播。
@@ -213,7 +213,7 @@ Dielectrics：电介质，如空气、玻璃、水、钻石。
 
 光击中电介质表面时既会折射进入介质，又会反射而离开介质，但我们的一束光线只能选择其一，所以我们随机选择折射或反射之一作为散射方式，经过多次取样的平均，最终效果相同
 
-#### 折射
+### 折射
 斯涅尔定律(Snell's Law，折射定律)：
 $$\eta_1\sin \theta_1 = \eta_2\sin \theta_2$$
 
@@ -239,47 +239,47 @@ $$\vec {R'_\parallel} = - \sqrt{1- |\vec {R'_\perp}|^2}\vec n,$$
 
 $$\vec {R'_\perp}=\frac {\eta_1} {\eta_2}(\vec R+(-\vec R \cdot \vec n)\vec n)$$
 
-#### 全反射
+### 全反射
 全反射与临界角：折射率太大会导致Snell's Law没有实根，即没有折射可能，只会反射，这就是全反射。折射角公式：
 
 $$\sin \theta_2 = \frac {\eta_1} {\eta_2}\sin \theta_1$$
 
 公式中如果 $\eta_1=1.5, \eta_2=1.0, \sin \theta_1>\frac 2 3$ 时 $\sin \theta_1>1$ ，折射角无解,发生全反射
 
-#### Schlick Approximation
+### Schlick Approximation
 现在我们的电介质要么只折射光线，要么只全反射光线。实际上的电介质根据入射角度会有不同的折射与反射比例，而不是二者只择其一。
 
 There is a big ugly equation for that, but almost everybody uses a cheap and surprisingly accurate polynomial approximation by Christophe Schlick. 
 
-#### 建模空心玻璃球
+### 建模空心玻璃球
 电介质的一个有意思且简单的花样就是空心玻璃球，如果半径为负数，球的空间范围没有改变，但表面的法向量反向了，这可以用来在球里打一个空气泡。
 
-### Positionable Camera
+## Positionable Camera
 让相机可以移动、旋转、缩放
 
 相机和电介质都很难调试(确实)。所以应当渐进式地开发。先允许视野/视场角(FOV,Field of View)可以调节；再开发位移和旋转。
 
 FOV横向和纵向不同，以横向为基准，纵向对横向乘一个洗漱。
 
-#### Camera Viewing Geometry
+### Camera Viewing Geometry
 先让相机对准z轴负方向，h作为向量与z轴的距离
 
 ![](imgs/2023-01-13-19-18-32.png)
 (图片不够直观， $\theta$ 视场角是两倍与z轴的夹角，所以计算tan要除以2, $h = \tan {(\frac \theta 2)}$ )
 
-#### Positioning and Orienting the Camera
+### Positioning and Orienting the Camera
 `look_from`点到`look_at`点，加上`view_up`代表相机指向上方方向的向量，确定了一个相机的位置、朝向与旋转角度；再加上之前的视场角`vfov`就能确定获取图像的范围
 
 ![](imgs/2023-01-14-17-10-39.png)
 用它们算出u,v,w,最终算出`origin`、`horizontal`、`vertical`、`lower_left_corner`这些变量
 
-### Defocus Blur
+## Defocus Blur
 我们现在的光线都从`look_from`发出，相当于成像到了一个质点上，不会有任何景深模糊效果。为了模拟景深模糊效果可以让光线从与(`look_at-look_from`)向量垂直的平面上的 以`look_from`为圆心的圆里随机选一点进行出射。出射到焦平面(focus plane)上，这个平面上的物象都是完全清晰的。
 
 实际是模拟了真实相机的一半：只模拟镜头之外的部分，而没有必要模拟镜头内的部分
 ![](imgs/2023-01-14-19-46-33.png)
 
-### 成果
+## 成果
 ![](imgs/2023-01-14-22-38-27.png)
 ![](imgs/2023-01-14-22-38-49.png)
 
@@ -289,20 +289,20 @@ to
 ![](imgs/2023-01-15-22-45-57.png)
 using Rayon
 
-#### 交流
+### 交流
 [Remda：3本,Rust,Rayon并行优化](https://rustcc.cn/article?id=bffdbc8b-1c99-4d1d-942c-91365b6ada0d)
 [fralken: 3本,Rust,Rayon并行优化](https://github.com/fralken/ray-tracing-in-one-weekend)
 [Rust, high-performance](https://github.com/skyzh/raytracer.rs/)
 [Writing About Ray Tracing in One Weekend with Rust Blog](https://andy.stanton.is/writing/about/ray-tracing-in-one-weekend/)
 [How can I share immutable data between threads in Rust?](https://stackoverflow.com/questions/62744175/how-can-i-share-immutable-data-between-threads-in-rust?r=SearchResults)
-#### 进步
+### 进步
 [多线程编程的秘密：Sync, Send, and 'Static](https://zhuanlan.zhihu.com/p/362285521)
 [Rayon 并行优化](https://developers.redhat.com/blog/2021/04/30/how-rust-makes-rayons-data-parallelism-magical#generic_constraints_in_rayon)
 [BVH场景管理加速光线追踪](https://blog.icysky.site/archives/164)
 [BVH](https://blog.csdn.net/m0_56399931/article/details/124145240)
 
-### 总结
-#### 《Ray Tracing in One Weekend》之旅
+## 总结
+### 《Ray Tracing in One Weekend》之旅
 在被中间一次旅游打断的总共花了一周的《Ray Tracing in One Weekend》之旅中我走进了光线追踪的世界：
 * 从镜头里射出光线，再通过光路可逆原理得到进入镜头射到某个像素点上的光线颜色；
 * 看似简单却又有许多门道的随机能产生出漫反射纹理；
@@ -311,7 +311,7 @@ using Rayon
 * `Schlick's approximation`等神奇的hack操作······
 ![](imgs/2023-01-16-14-21-23.png)
 
-#### Rust 语言
+### Rust 语言
 这个项目对我的Rust来说也算是一次超纲演练。碰到了不少课本上不会出现的复杂或怪异的问题：
 * 各种自定义类型到底应该选择`Copy`&`Clone`还是`Move`(`Copy`与`Clone`也混淆了，往往将两个绑定在了一起)；
 * `match`中出现浮点数字面量是不受支持的行为(包括看起来无比自然的`Range`)；这个追踪了好久相关issue，了解到它无法被支持的的一些复杂原因，和暂时(或许永远)不会被弃用的消息，但为了不报警告还是用匹配守卫替代了它
@@ -321,16 +321,16 @@ using Rayon
 ······
 
 所以现在就是一个总结提升Rust的良机
-##### Copy与Clone
+#### Copy与Clone
 `Copy`: 向编译器说明该类型的语义，与`Move`相反；代表重新绑定行为时(包括`let`、函数传参)的默认行为应该是：`Clone`一份副本，原来的绑定仍有效；还是`Move`移交所有权，原来的绑定失效
 
 `Clone`: `#[derive(Clone)]`向编译器说明该类型可以逐比特拷贝，并生成默认实现；或者手动实现语义相同而实际行为可能不同的`Clone`操作(如`Rc`的`Clone`实际是引用计数+1; `Box`的`Clone`实际是深拷贝)
 
-##### 面向对象 & 多态
+#### 面向对象 & 多态
 `Rust`的面向对象特性在这个项目来看是很够用的，和写C++没太大差别。
 至于到底用泛型还是动态多态，动态多态 灵活/拓展性更强，省空间；泛型速度更快，而二进制代码会更大；但现在的代码来看区别不大
 
-##### 并发
+#### 并发
 `Sync`：对象可以安全地在线程间通过不可变借用(可变借用不可能线程安全)来共享(未实现它的反例：`Rc`；`Cell`)
 
 `Send`：对象可以安全地在线程之间传递所有权(未实现它的反例：`Rc`的引用计数是线程不安全的，所以无法实现共享所有权，需要用`Arc`)
@@ -339,14 +339,14 @@ using Rayon
 
 这里其实还是没有完全搞懂，因为还涉及锁(`Mutex​`)、内部可变性(`Cell`、`​RefCell`)等问题；暂时没有研究
 
-##### crates
+#### crates
 `Image`: 非常丝滑，现在可以生成`png`来代替之前的`ppm`了
 
 `Rayon`: 弄懂`Sync``Send`与`Trait`继承以后非常丝滑，让采样过程轻易地并行化，提速显著
 
 `cargo`非常棒，但编译雀食慢...
 
-#### 下一步
+### 下一步
 稍微看了看后面的添加光源、添加形状、材质、动态模糊、BVH加速(光线追踪硬件单元的基础)等内容。但现在有缓考科目和CPC寒假集训的压力应该暂时不会开坑了。
 
 # Ray Tracing the Next Week Notes
@@ -613,3 +613,8 @@ Auto-detecting system features:
 
 ### 密度一定的介质 Constant Density Mediums
 进入介质的光可能从内部某点散射，也可能径直穿过介质。根据密度不同这两者的分配情况不同
+
+## 成果
+![](./imgs/final_2.png)
+![](./imgs/test/render_final_2.png)
+跑了5h+...

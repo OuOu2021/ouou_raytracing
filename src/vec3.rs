@@ -18,26 +18,36 @@ pub struct Vec3 {
     pub(self) e: [f64; 3],
 }
 
+#[inline(always)]
+pub const fn vec3(x: f64, y: f64, z: f64) -> Vec3 {
+    Vec3::new(x, y, z)
+}
+
 impl Default for Vec3 {
     fn default() -> Self {
-        Self { e: [0., 0., 0.] }
+        Self::ZERO
     }
 }
 
 impl Vec3 {
-    pub const fn zero() -> Self {
-        Self { e: [0., 0., 0.] }
-    }
+    pub const ZERO: Self = Self { e: [0., 0., 0.] };
+    pub const ONE: Self = Self { e: [1., 1., 1.] };
+    pub const X: Self = Self { e: [1., 0., 0.] };
+    pub const Y: Self = Self { e: [0., 1., 0.] };
+    pub const Z: Self = Self { e: [0., 0., 1.] };
+    
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { e: [x, y, z] }
     }
+
     pub fn to_color(&self) -> (usize, usize, usize) {
         let x = (self.e[0] * 255.999) as usize;
         let y = (self.e[1] * 255.999) as usize;
         let z = (self.e[2] * 255.999) as usize;
         (x, y, z)
     }
-    pub fn to_unit(&self) -> Self {
+	// to unit vector
+    pub fn normalize(&self) -> Self {
         let len = self.len();
         Self {
             e: [self.e[0] / len, self.e[1] / len, self.e[2] / len],
@@ -58,10 +68,10 @@ impl Vec3 {
     pub fn len_squared(&self) -> f64 {
         self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
     }
-    pub fn dot_mul(&self, rhs: Self) -> f64 {
+    pub fn dot(&self, rhs: Self) -> f64 {
         self.e[0] * rhs.e[0] + self.e[1] * rhs.e[1] + self.e[2] * rhs.e[2]
     }
-    pub fn cross_mul(&self, rhs: Self) -> Self {
+    pub fn cross(&self, rhs: Self) -> Self {
         Self {
             e: [
                 self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
@@ -94,21 +104,21 @@ impl Vec3 {
         }
     }
     pub fn random_unit(r: f64) -> Self {
-        Self::random_in_sphere(r).to_unit()
+        Self::random_in_sphere(r).normalize()
     }
     pub fn near_zero(&self) -> bool {
         const EPS: f64 = 1e-8;
         self.e.iter().all(|&x| x.abs() < EPS)
     }
     pub fn reflect(&self, normal: Vec3) -> Self {
-        *self - 2. * self.dot_mul(normal) * normal
+        *self - 2. * self.dot(normal) * normal
     }
     pub fn refract(
         &self,
         normal: Vec3,
         etai_over_etat: f64, /*折射率之比，入:出 */
     ) -> Vec3 {
-        let cos_theta_1 = -self.dot_mul(normal).min(1.0);
+        let cos_theta_1 = -self.dot(normal).min(1.0);
         let r_out_perp/*垂直分量 */ = etai_over_etat * (*self + cos_theta_1*normal);
         let r_out_parallel/*平行分量 */ = -(1.0- r_out_perp.len_squared()).abs().sqrt() * normal;
         r_out_perp + r_out_parallel
@@ -320,7 +330,7 @@ impl Add for Color {
 }
 impl Sum for Color {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Color(Vec3::zero()), |a, b| {
+        iter.fold(Color(Vec3::ZERO), |a, b| {
             Color(Vec3::new(a.0[0] + b.0[0], a.0[1] + b.0[1], a.0[2] + b.0[2]))
         })
     }

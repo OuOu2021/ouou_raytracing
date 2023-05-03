@@ -101,7 +101,7 @@ fn perlin_interpolation(c: [[[Vec3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
                             let weight_vec = Vec3::new(u - i as f64, v - j as f64, w - k as f64);
 
                             // 梯度加权求和得出灰度
-                            f2(i, uu) * f2(j, vv) * f2(k, ww) * c[i][j][k].dot_mul(weight_vec)
+                            f2(i, uu) * f2(j, vv) * f2(k, ww) * c[i][j][k].dot(weight_vec)
                         })
                         .sum::<f64>()
                 })

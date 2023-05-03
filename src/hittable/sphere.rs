@@ -35,7 +35,7 @@ impl Hittable for Sphere {
         //光源指向球心
         let oc = ray_in.origin() - self.center;
         let a = ray_in.direction().len_squared();
-        let half_b = oc.dot_mul(ray_in.direction());
+        let half_b = oc.dot(ray_in.direction());
         let c = oc.len_squared() - self.radius * self.radius;
         let delta = half_b * half_b - a * c;
         if delta < 0. {

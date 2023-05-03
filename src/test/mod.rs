@@ -41,8 +41,13 @@ pub fn test_render(
 
     let mut img_buf = ImageBuffer::new(image_width, image_height);
     for (i, j, pixel) in img_buf.enumerate_pixels_mut() {
-        if j % 30 == 0 && i == 0 {
-            eprint!("\rScanlines remaining: {} ", image_height - j);
+        if j % 5 == 0 && i == 0 {
+            let now = SystemTime::now();
+            eprint!(
+                "\rScanlines remaining: {}, time cost: {:.2} seconds",
+                image_height - j,
+                now.duration_since(start_time).unwrap().as_secs_f64()
+            );
         }
         let row = image_height - j;
         let pixel_color = (0..sample_per_pixel)
@@ -90,3 +95,5 @@ mod test_light;
 mod test_cornell_box;
 
 mod test_medium;
+
+mod test_final_2;
