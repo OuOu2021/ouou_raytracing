@@ -614,6 +614,46 @@ Auto-detecting system features:
 ### 密度一定的介质 Constant Density Mediums
 进入介质的光可能从内部某点散射，也可能径直穿过介质。根据密度不同这两者的分配情况不同 
 
+## 重构
+- [x] 把自制的基于`f64`的`Vec3`改为采用`f32`、有`SIMD`优化的[glam crate](https://crates.io/crates/glam)中的`Vec3A`
+
+- [ ] 丰富注释文档
+
+- [ ] 更改项目结构
+	- [ ] 单元测试
+	- [ ] 将当前的`tests`改为`examples`
+	- [ ] 更改`bench`，随机采样一些光线计算效率而非整张图片渲染
+
+### Advanced features
+- [ ] **Track 1: Reduce Contention** 此项工作的前提条件是完成多线程渲染。在多线程环境中，clone / drop Arc 可能会导致性能下降。因此，我们要尽量减少 Arc 的使用。这项任务的目标是，仅在线程创建的时候 clone Arc；其他地方不出现 Arc，将 Arc 改为引用。
+- [ ] **Track 2: Static Dispatch** 调用 `Box<dyn trait>` / `Arc<dyn trait>` / `&dyn trait` 中的函数时会产生额外的开销。我们可以通过泛型来解决这个问题。
+  * 这个任务的目标是，通过定义新的泛型材质、变换和物体，比如 `LambertianStatic<T>`，并在场景中使用他们，从而减少动态调用的开销。你也可以另开一个模块定义和之前的材质同名的 struct。
+  * 你可以在 `material.rs` 里找到泛型的相关用法。
+  * 仅在 `HitRecord`, `ScatterRecord` (这个在 Rest of Your Life 的剩余部分中出现), `HittableList` 和 `BVHNode` 中使用 `dyn`。
+  * 如果感兴趣，可以探索如何使用 `macro_rules` 来减少几乎相同的代码写两遍的冗余。
+- [ ] **Track 3: Code Generation** 此项工作的前提条件是完成 BVH。
+  * 目前，`BVHNode` 是在运行时构造的。这个过程其实可以在编译期完成。我们可以通过过程宏生成所有的物体，并构造静态的 `BVHNode`，从而提升渲染效率。
+  * `raytracer_codegen`和`raytracer`大概是不能共用module的，你可能需要把一些实现（如`Vec3`）简单地copy到`raytracer_codegen`下。
+  * 你可以使用 `cargo expand` 来查看过程宏处理过后的代码。你也可以在编译过程中直接输出过程宏生成的代码。
+  * `codegen` 部分不需要通过 clippy。
+  * 如果感兴趣，你也可以探索给过程宏传参的方法。e.g. 通过 `make_spheres_impl! { 100 }` 生成可以产生 100 个球的函数。
+- [ ] **Track 4: PDF Static Dispatch** 此项工作的前提条件是完成 Rest of your Life 的剩余部分。PDF 中需要处理的物体使用泛型完成，去除代码路径中的 `&dyn`。
+- [ ] **Track 5: More Code Generation** 在过程宏中，读取文件，直接从 yaml 或 JSON 文件（选择一种即可）生成场景对应的程序。
+  * 在 `data` 文件夹中给出了一些例子。
+  * 例子中 `BVHNode` 里的 `bounding_box` 是冗余数据。你可以不使用这个数据。
+  * 读 JSON / yaml 可以调包。
+- [ ] **Track 6: Advanced Features** 增加对 Transform 的 PDF 支持。
+* 如果你有多余的时间，你可以通过 benchmark 来测试实现功能前后的区别。
+  * 完成 Track 3 前请备份代码 (比如记录 git 的 commit id)。完成 Track 4, 5, 6 时请保留原先的场景和程序，在此基础上添加新的内容。
+  * 你可以使用 `criterion` crate 做 benchmark。benchmark 的内容可以是往构造好的场景中随机打光线，记录打一条光线所需的时间。
+- [ ] **Track 7: Support for .obj** 支持载入obj文件并渲染。完成这一部分你可能需要：
+  * 了解obj文件格式
+  * 实现一个obj_loader
+    * 可调包，如tobj
+    * OBJ文件格式和tobj可参考[参考资料](https://docs.rs/tobj/3.0.1/tobj/)或自行搜索
+  * 实现对简单多边形的渲染
+  * 支持obj可以让你最后的大作更精彩哦 :)
+
 ## 成果
 ![](./imgs/final_2.png)
 ![](./imgs/test/render_final_2.png)
