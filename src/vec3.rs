@@ -1,136 +1,96 @@
-use rand::*;
 use std::{
     fmt::Display,
     iter::Sum,
-    ops::{
-        Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
-    },
+    ops::{Add, AddAssign, Index, IndexMut, Mul, Range, Sub},
 };
+
+pub use glam::Vec3A as Vec3;
+pub use glam::vec3a as vec3; 
+use rand::*;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Color(pub Vec3);
 
 #[derive(Debug, Clone, Copy)]
 pub struct Point3(pub Vec3);
+pub trait Vec3Funcs {
+    //fn to_color(&self) -> (usize, usize, usize);
 
-#[derive(Debug, Clone, Copy)]
-pub struct Vec3 {
-    pub(self) e: [f64; 3],
+    fn refract(
+        &self,
+        normal: Vec3,
+        etai_over_etat: f32, /*折射率之比，入:出 */
+    ) -> Vec3;
+    fn reflect(&self, normal: Vec3) -> Self;
+    fn near_zero(&self) -> bool;
+    fn random(rg: Range<f32>) -> Self;
+    fn random_unit(r: f32) -> Self;
+    fn random_in_sphere(r: f32) -> Self;
+    fn random_in_unit_disk() -> Self;
 }
-
-#[inline(always)]
-pub const fn vec3(x: f64, y: f64, z: f64) -> Vec3 {
-    Vec3::new(x, y, z)
-}
-
-impl Default for Vec3 {
-    fn default() -> Self {
-        Self::ZERO
+/* 
+impl From<Vec3> for Color{
+    fn from(value: Vec3) -> Self {
+        Color(value.to_color())
     }
 }
+*/
 
-impl Vec3 {
-    pub const ZERO: Self = Self { e: [0., 0., 0.] };
-    pub const ONE: Self = Self { e: [1., 1., 1.] };
-    pub const X: Self = Self { e: [1., 0., 0.] };
-    pub const Y: Self = Self { e: [0., 1., 0.] };
-    pub const Z: Self = Self { e: [0., 0., 1.] };
-    
-    pub const fn new(x: f64, y: f64, z: f64) -> Self {
-        Self { e: [x, y, z] }
-    }
-
-    pub fn to_color(&self) -> (usize, usize, usize) {
-        let x = (self.e[0] * 255.999) as usize;
-        let y = (self.e[1] * 255.999) as usize;
-        let z = (self.e[2] * 255.999) as usize;
+impl Vec3Funcs for Vec3 {
+	/* 
+    fn to_color(&self) -> (usize, usize, usize) {
+        let x = (self[0] * 255.999) as usize;
+        let y = (self[1] * 255.999) as usize;
+        let z = (self[2] * 255.999) as usize;
         (x, y, z)
     }
-	// to unit vector
-    pub fn normalize(&self) -> Self {
-        let len = self.len();
-        Self {
-            e: [self.e[0] / len, self.e[1] / len, self.e[2] / len],
-        }
-    }
-    pub fn x(&self) -> f64 {
-        self.e[0]
-    }
-    pub fn y(&self) -> f64 {
-        self.e[1]
-    }
-    pub fn z(&self) -> f64 {
-        self.e[2]
-    }
-    pub fn len(&self) -> f64 {
-        self.len_squared().sqrt()
-    }
-    pub fn len_squared(&self) -> f64 {
-        self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
-    }
-    pub fn dot(&self, rhs: Self) -> f64 {
-        self.e[0] * rhs.e[0] + self.e[1] * rhs.e[1] + self.e[2] * rhs.e[2]
-    }
-    pub fn cross(&self, rhs: Self) -> Self {
-        Self {
-            e: [
-                self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
-                self.e[2] * rhs.e[0] - self.e[0] * rhs.e[2],
-                self.e[0] * rhs.e[1] - self.e[1] * rhs.e[0],
-            ],
-        }
-    }
-    pub const fn to_tuple(&self) -> (f64, f64, f64) {
-        (self.e[0], self.e[1], self.e[2])
-    }
-    pub fn random(rg: Range<f64>) -> Self {
+	*/
+    fn random(rg: Range<f32>) -> Self {
         let mut rng = rand::thread_rng();
-        Self {
-            e: [
-                rng.gen_range(rg.clone()),
-                rng.gen_range(rg.clone()),
-                rng.gen_range(rg),
-            ],
-        }
+        Self::new(
+            rng.gen_range(rg.clone()),
+            rng.gen_range(rg.clone()),
+            rng.gen_range(rg),
+        )
     }
-    pub fn random_in_sphere(r: f64) -> Self {
+    fn random_in_sphere(r: f32) -> Self {
         loop {
             let tmp = Self::random(-r..r);
-            if tmp.len_squared() >= r * r {
+            if tmp.length_squared() >= r * r {
                 continue;
             } else {
                 return tmp;
             }
         }
     }
-    pub fn random_unit(r: f64) -> Self {
+    fn random_unit(r: f32) -> Self {
         Self::random_in_sphere(r).normalize()
     }
-    pub fn near_zero(&self) -> bool {
-        const EPS: f64 = 1e-8;
-        self.e.iter().all(|&x| x.abs() < EPS)
+    fn near_zero(&self) -> bool {
+        const EPS: f32 = 1e-6;
+        self.x.abs() < EPS && self.y.abs() < EPS && self.z.abs() < EPS
     }
-    pub fn reflect(&self, normal: Vec3) -> Self {
+    fn reflect(&self, normal: Vec3) -> Self {
         *self - 2. * self.dot(normal) * normal
     }
-    pub fn refract(
+    fn refract(
         &self,
         normal: Vec3,
-        etai_over_etat: f64, /*折射率之比，入:出 */
+        etai_over_etat: f32, /*折射率之比，入:出 */
     ) -> Vec3 {
         let cos_theta_1 = -self.dot(normal).min(1.0);
         let r_out_perp/*垂直分量 */ = etai_over_etat * (*self + cos_theta_1*normal);
-        let r_out_parallel/*平行分量 */ = -(1.0- r_out_perp.len_squared()).abs().sqrt() * normal;
+        let r_out_parallel/*平行分量 */ = -(1.0- r_out_perp.length_squared()).abs().sqrt() * normal;
         r_out_perp + r_out_parallel
     }
-    pub fn random_in_unit_disk() -> Self {
+    fn random_in_unit_disk() -> Self {
         loop {
-            let p = Vec3::new(
+            let p = vec3(
                 thread_rng().gen_range(-1.0..1.0),
                 thread_rng().gen_range(-1.0..1.0),
                 0.,
             );
-            if p.len_squared() >= 1.0 {
+            if p.length_squared() >= 1.0 {
                 continue;
             } else {
                 return p;
@@ -139,171 +99,46 @@ impl Vec3 {
     }
 }
 
-impl Add for Vec3 {
-    type Output = Vec3;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.e[0] + rhs.e[0],
-            self.e[1] + rhs.e[1],
-            self.e[2] + rhs.e[2],
-        )
-    }
-}
-impl AddAssign for Vec3 {
-    fn add_assign(&mut self, rhs: Self) {
-        self.e[0] += rhs.e[0];
-        self.e[1] += rhs.e[1];
-        self.e[2] += rhs.e[2];
-    }
-}
-
-impl Sub for Vec3 {
-    type Output = Vec3;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.e[0] - rhs.e[0],
-            self.e[1] - rhs.e[1],
-            self.e[2] - rhs.e[2],
-        )
-    }
-}
-impl SubAssign for Vec3 {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.e[0] -= rhs.e[0];
-        self.e[1] -= rhs.e[1];
-        self.e[2] -= rhs.e[2];
-    }
-}
-
-impl Mul<&Vec3> for f64 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: &Vec3) -> Self::Output {
-        Vec3::new(rhs.e[0] * self, rhs.e[1] * self, rhs.e[2] * self)
-    }
-}
-
-impl Mul<Vec3> for f64 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(rhs.e[0] * self, rhs.e[1] * self, rhs.e[2] * self)
-    }
-}
-impl Mul<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: f64) -> Self::Output {
-        Vec3::new(self.e[0] * rhs, self.e[1] * rhs, self.e[2] * rhs)
-    }
-}
-impl MulAssign<f64> for Vec3 {
-    fn mul_assign(&mut self, rhs: f64) {
-        self.e[0] *= rhs;
-        self.e[1] *= rhs;
-        self.e[2] *= rhs;
-    }
-}
-
-impl Div<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn div(self, rhs: f64) -> Self::Output {
-        Vec3::new(self.e[0] / rhs, self.e[1] / rhs, self.e[2] / rhs)
-    }
-}
-impl DivAssign<f64> for Vec3 {
-    fn div_assign(&mut self, rhs: f64) {
-        self.e[0] /= rhs;
-        self.e[1] /= rhs;
-        self.e[2] /= rhs;
-    }
-}
-
-impl Neg for Vec3 {
-    type Output = Vec3;
-
-    fn neg(self) -> Self::Output {
-        Vec3 {
-            e: [-self.e[0], -self.e[1], -self.e[2]],
-        }
-    }
-}
-
-// 以下是语法糖
-impl Index<usize> for Vec3 {
-    type Output = f64;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.e[index]
-    }
-}
-
-impl IndexMut<usize> for Vec3 {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.e[index]
-    }
-}
-
-impl Display for Vec3 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {}", self.e[0], self.e[1], self.e[2])?;
-        Ok(())
-    }
-}
-
 impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {}", self.0.e[0], self.0.e[1], self.0.e[2])
+        write!(f, "{} {} {}", self.0[0], self.0[1], self.0[2])
     }
 }
 
 impl Display for Point3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {}", self.0.e[0], self.0.e[1], self.0.e[2])
+        write!(f, "{} {} {}", self.0[0], self.0[1], self.0[2])
     }
 }
 
 impl Color {
-    pub const fn white() -> Self {
-        Color(Vec3::new(1., 1., 1.))
+	pub const WHITE: Self = Self(vec3(1., 1., 1.));
+    pub const RED: Self = Self(vec3(1., 0., 0.));
+    pub const GREEN: Self = Self(vec3(0., 1., 0.));
+	pub const BLUE: Self = Self(vec3(0., 0., 1.));
+    pub const BLACK: Self = Self(vec3(0., 0., 0.));
+    pub const fn new(x: f32, y: f32, z: f32) -> Self {
+        Color(vec3(x, y, z))
     }
-    pub const fn red() -> Self {
-        Color(Vec3::new(1., 0., 0.))
-    }
-    pub const fn green() -> Self {
-        Color(Vec3::new(0., 1., 0.))
-    }
-    pub const fn blue() -> Self {
-        Color(Vec3::new(0., 0., 1.))
-    }
-    pub const fn black() -> Self {
-        Color(Vec3::new(0., 0., 0.))
-    }
-    pub const fn new(x: f64, y: f64, z: f64) -> Self {
-        Color(Vec3::new(x, y, z))
-    }
-    pub const fn to_tuple(&self) -> (f64, f64, f64) {
-        (self.0.e[0], self.0.e[1], self.0.e[2])
+    pub fn to_tuple(&self) -> (f32, f32, f32) {
+        (self.0[0], self.0[1], self.0[2])
     }
 }
 
 impl Default for Color {
     fn default() -> Self {
-        Color::black()
+        Self::BLACK
     }
 }
 
-impl Mul<f64> for Color {
+impl Mul<f32> for Color {
     type Output = Color;
 
-    fn mul(self, rhs: f64) -> Self::Output {
+    fn mul(self, rhs: f32) -> Self::Output {
         Color(self.0 * rhs)
     }
 }
-impl Mul<Color> for f64 {
+impl Mul<Color> for f32 {
     type Output = Color;
 
     fn mul(self, rhs: Color) -> Self::Output {
@@ -321,7 +156,7 @@ impl Add for Color {
     type Output = Color;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Color(Vec3::new(
+        Color(vec3(
             self.0[0] + rhs.0[0],
             self.0[1] + rhs.0[1],
             self.0[2] + rhs.0[2],
@@ -331,7 +166,7 @@ impl Add for Color {
 impl Sum for Color {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Color(Vec3::ZERO), |a, b| {
-            Color(Vec3::new(a.0[0] + b.0[0], a.0[1] + b.0[1], a.0[2] + b.0[2]))
+            Color(vec3(a.0[0] + b.0[0], a.0[1] + b.0[1], a.0[2] + b.0[2]))
         })
     }
 }
@@ -339,7 +174,7 @@ impl Mul for Color {
     type Output = Color;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Color(Vec3::new(
+        Color(vec3(
             self.0[0] * rhs.0[0],
             self.0[1] * rhs.0[1],
             self.0[2] * rhs.0[2],
@@ -349,26 +184,26 @@ impl Mul for Color {
 
 impl Point3 {
     pub const fn zero() -> Self {
-        Point3(Vec3::new(0., 0., 0.))
+        Point3(vec3(0., 0., 0.))
     }
-    pub const fn new(x: f64, y: f64, z: f64) -> Self {
-        Point3(Vec3::new(x, y, z))
+    pub const fn new(x: f32, y: f32, z: f32) -> Self {
+        Point3(vec3(x, y, z))
     }
-    pub fn x(&self) -> f64 {
-        self.0.e[0]
+    pub fn x(&self) -> f32 {
+        self.0[0]
     }
-    pub fn y(&self) -> f64 {
-        self.0.e[1]
+    pub fn y(&self) -> f32 {
+        self.0[1]
     }
-    pub fn z(&self) -> f64 {
-        self.0.e[2]
+    pub fn z(&self) -> f32 {
+        self.0[2]
     }
 }
 impl Add<Vec3> for Point3 {
     type Output = Point3;
 
     fn add(self, rhs: Vec3) -> Self::Output {
-        Point3(Vec3::new(
+        Point3(vec3(
             self.0[0] + rhs[0],
             self.0[1] + rhs[1],
             self.0[2] + rhs[2],
@@ -388,13 +223,13 @@ impl Sub<Point3> for Point3 {
     type Output = Vec3;
 
     fn sub(self, rhs: Point3) -> Self::Output {
-        Vec3::new(self.0[0] - rhs[0], self.0[1] - rhs[1], self.0[2] - rhs[2])
+        vec3(self.0[0] - rhs[0], self.0[1] - rhs[1], self.0[2] - rhs[2])
     }
 }
 
 // 以下是语法糖
 impl Index<usize> for Point3 {
-    type Output = f64;
+    type Output = f32;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index]
@@ -407,10 +242,10 @@ impl IndexMut<usize> for Point3 {
     }
 }
 
-impl Mul<f64> for Point3 {
+impl Mul<f32> for Point3 {
     type Output = Point3;
 
-    fn mul(self, rhs: f64) -> Self::Output {
+    fn mul(self, rhs: f32) -> Self::Output {
         Point3::new(self.0[0] * rhs, self.0[1] * rhs, self.0[2] * rhs)
     }
 }

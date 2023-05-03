@@ -11,7 +11,7 @@ fn render_cornell_box() {
                 Point3::new(278.0, 278.0, -800.0),
                 Point3::new(278., 278., 0.),
             ),
-            Vec3::new(0., 1., 0.),
+            vec3(0., 1., 0.),
             40.,
             1.,
             0.0,
@@ -20,7 +20,7 @@ fn render_cornell_box() {
         ),
         600,
         200,
-        Color::black(),
+        Color::BLACK,
         &generate_box(),
         function_name!(),
     );

@@ -15,10 +15,10 @@ fn render_earth() {
 }
 
 fn cam() -> Camera {
-    const ASPECT_RATIO: f64 = 16. / 9.;
+    const ASPECT_RATIO: f32 = 16. / 9.;
     let look_from = Point3::new(13., 2.0, 3.);
     let look_at = Point3::new(0., 0., 0.);
-    let vup = Vec3::new(0., 1., 0.);
+    let vup = vec3(0., 1., 0.);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
 

@@ -11,7 +11,7 @@ fn render_light() {
     test_render(
         Camera::new(
             (Point3::new(26., 3.0, 6.), Point3::new(0., 0., 0.)),
-            Vec3::new(0., 1., 0.),
+            vec3(0., 1., 0.),
             20.,
             16. / 9.,
             0.0,
@@ -20,7 +20,7 @@ fn render_light() {
         ),
         800,
         400,
-        Color::black(),
+        Color::BLACK,
         &simple_light(),
         function_name!(),
     );

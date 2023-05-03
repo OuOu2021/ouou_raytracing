@@ -24,7 +24,7 @@ impl Hittable for Translate {
     fn hit(
         &self,
         ray_in: &crate::ray::Ray,
-        t_range: &std::ops::Range<f64>,
+        t_range: &std::ops::Range<f32>,
     ) -> Option<crate::hittable::HitRecord> {
         let ray_moved = Ray::new(
             ray_in.origin() - self.offset,
@@ -46,7 +46,7 @@ impl Hittable for Translate {
         }
     }
 
-    fn bounding_box(&self, time: &std::ops::Range<f64>) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, time: &std::ops::Range<f32>) -> Option<crate::aabb::AABB> {
         self.ptr.bounding_box(time).map(|pre_box| {
             crate::aabb::AABB::new(pre_box.minimum + self.offset, pre_box.maximum + self.offset)
         })

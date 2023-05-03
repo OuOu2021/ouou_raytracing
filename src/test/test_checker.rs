@@ -34,28 +34,28 @@ fn random_scene_with_checker() -> BvhNode {
     ];
     for a in -11..11 {
         for b in -11..11 {
-            let choose_mat: f64 = random();
+            let choose_mat: f32 = random();
             let mut center = Point3::new(
-                a as f64 + 0.9 * random::<f64>(),
+                a as f32 + 0.9 * random::<f32>(),
                 0.2,
-                b as f64 + 0.9 * random::<f64>(),
+                b as f32 + 0.9 * random::<f32>(),
             );
             loop {
-                if (center - c[0]).len() < 1.2
-                    || (center - c[1]).len() < 1.2
-                    || (center - c[2]).len() < 1.2
+                if (center - c[0]).length() < 1.2
+                    || (center - c[1]).length() < 1.2
+                    || (center - c[2]).length() < 1.2
                 {
                     center = Point3::new(
-                        a as f64 + 0.9 * random::<f64>(),
+                        a as f32 + 0.9 * random::<f32>(),
                         0.2,
-                        b as f64 + 0.9 * random::<f64>(),
+                        b as f32 + 0.9 * random::<f32>(),
                     );
                 } else {
                     break;
                 }
             }
 
-            if (center - Point3::new(4., 0.2, 0.)).len() > 0.9 {
+            if (center - Point3::new(4., 0.2, 0.)).length() > 0.9 {
                 let sphere_material: Arc<dyn Material + Send + Sync>;
                 match choose_mat {
                     a if (0.0..=0.8).contains(&a) => {
@@ -63,7 +63,7 @@ fn random_scene_with_checker() -> BvhNode {
                         let albedo = Color(Vec3::random(0.0..1.)) * Color(Vec3::random(0.0..1.));
                         sphere_material = Arc::new(Lambertian::new(albedo));
 
-                        let center_2 = center + Vec3::new(0., thread_rng().gen_range(0.0..0.5), 0.);
+                        let center_2 = center + vec3(0., thread_rng().gen_range(0.0..0.5), 0.);
                         world.add(Arc::new(MovingSphere::new(
                             (center, center_2),
                             0.2,

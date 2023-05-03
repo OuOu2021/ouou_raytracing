@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::{aabb::surrounding_box, hittable::*, ray::Ray};
 
+/// 生成HittableList，类似vec!
 #[macro_export]
 macro_rules! hittablelist {
     ($($x:expr),+ $(,)?) => {
@@ -14,6 +15,8 @@ macro_rules! hittablelist {
         }
     };
 }
+
+/// 一组Hittable的集合，用于构建场景
 pub struct HittableList {
     objects: Vec<Arc<dyn Hittable>>,
 }
@@ -50,14 +53,15 @@ impl From<HittableList> for Vec<Arc<dyn Hittable>> {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_range: &std::ops::Range<f32>) -> Option<HitRecord> {
+		// 多处碰撞取最近的
         self.objects
             .iter()
             .filter_map(|x| x.hit(ray, t_range))
             .min_by(|x, y| x.t.partial_cmp(&y.t).expect("无法比较"))
     }
 
-    fn bounding_box(&self, time: &std::ops::Range<f64>) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, time: &std::ops::Range<f32>) -> Option<crate::aabb::AABB> {
         if self.objects.is_empty() {
             None
         } else if let Some(mut now_box) = self.objects.first().unwrap().bounding_box(time) {

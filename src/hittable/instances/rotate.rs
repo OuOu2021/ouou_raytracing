@@ -1,5 +1,5 @@
 use std::{
-    f64::{INFINITY, NEG_INFINITY},
+    f32::{INFINITY, NEG_INFINITY},
     sync::Arc,
 };
 
@@ -7,18 +7,18 @@ use crate::{
     aabb::AABB,
     hittable::{HitRecord, Hittable},
     ray::Ray,
-    vec3::{Point3, Vec3},
+    vec3::{Point3, vec3},
 };
 
 pub struct RotateY {
     ptr: Arc<dyn Hittable>,
-    sin_theta: f64,
-    cos_theta: f64,
+    sin_theta: f32,
+    cos_theta: f32,
     bbox: Option<AABB>,
 }
 
 impl RotateY {
-    pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
+    pub fn new(p: Arc<dyn Hittable>, angle: f32) -> Self {
         let rad = angle.to_radians();
         let (sin, cos) = (rad.sin(), rad.cos());
         if let Some(bbox) = p.bounding_box(&(0.0..1.0)) {
@@ -30,14 +30,14 @@ impl RotateY {
             (0..2).for_each(|i| {
                 (0..2).for_each(|j| {
                     (0..2).for_each(|k| {
-                        let (i, j, k) = (i as f64, j as f64, k as f64);
+                        let (i, j, k) = (i as f32, j as f32, k as f32);
                         let (x, y, z) = (
                             i * bbox.maximum.x() + (1. - i) * bbox.minimum.x(),
                             j * bbox.maximum.y() + (1. - j) * bbox.minimum.y(),
                             k * bbox.maximum.z() + (1. - k) * bbox.minimum.z(),
                         );
                         let (newx, newz) = (cos * x + sin * z, -sin * x + cos * z);
-                        let tester = Vec3::new(newx, y, newz);
+                        let tester = vec3(newx, y, newz);
                         (0..3).for_each(|c| {
                             min[c] = min[c].min(tester[c]);
                             max[c] = max[c].max(tester[c]);
@@ -66,7 +66,7 @@ impl Hittable for RotateY {
     fn hit(
         &self,
         ray_in: &crate::ray::Ray,
-        t_range: &std::ops::Range<f64>,
+        t_range: &std::ops::Range<f32>,
     ) -> Option<crate::hittable::HitRecord> {
         let mut origin = ray_in.origin();
         let mut direction = ray_in.direction();
@@ -98,7 +98,7 @@ impl Hittable for RotateY {
         }
     }
 
-    fn bounding_box(&self, _time: &std::ops::Range<f64>) -> Option<AABB> {
+    fn bounding_box(&self, _time: &std::ops::Range<f32>) -> Option<AABB> {
         self.bbox
     }
 }

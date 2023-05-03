@@ -19,6 +19,7 @@ pub mod ray;
 pub mod textures;
 pub mod utility;
 pub mod vec3;
+pub use vec3::Vec3Funcs;
 
 #[cfg(test)]
 mod test;
@@ -40,8 +41,8 @@ pub fn renderer(
     eprintln!("Start Initializing");
     // Image
     // 横纵比
-    const MAX_DEPTH: u32 = 50;
-    let image_width = image_width as f64;
+    const MAX_DEPTH: u32 = 8;
+    let image_width = image_width as f32;
     let image_height = image_width / cam.get_aspect_ratio();
     let (image_width, image_height) = (image_width as u32, image_height as u32);
     // Render
@@ -58,8 +59,8 @@ pub fn renderer(
             .map(|_| {
                 // 将像素坐标转换为场景坐标，然后在附近随机采样
                 // gen方法默认就是生成[0,1)的浮点数
-                let u = (i as f64 + random::<f64>()) / (image_width - 1) as f64;
-                let v = (row as f64 + random::<f64>()) / (image_height - 1) as f64;
+                let u = (i as f32 + random::<f32>()) / (image_width - 1) as f32;
+                let v = (row as f32 + random::<f32>()) / (image_height - 1) as f32;
                 let r = cam.get_ray((u, v));
                 ray_color(&r, background, world, MAX_DEPTH)
             })

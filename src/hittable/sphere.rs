@@ -1,14 +1,14 @@
-use std::f64::consts::PI;
+use std::f32::consts::PI;
 
 use crate::{aabb::AABB, hittable::*, material::Material, vec3::*};
 pub struct Sphere {
     center: Point3,
-    radius: f64,
+    radius: f32,
     material: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64, material: Arc<dyn Material + Send + Sync>) -> Self {
+    pub fn new(center: Point3, radius: f32, material: Arc<dyn Material + Send + Sync>) -> Self {
         Self {
             center,
             radius,
@@ -17,7 +17,7 @@ impl Sphere {
     }
 
     /// 返回以原点为球心的单位球上一点的uv坐标
-    pub fn get_sphere_uv(p: Point3) -> (f64, f64) {
+    pub fn get_sphere_uv(p: Point3) -> (f32, f32) {
         // p: a given point on the sphere of radius one, centered at the origin.
         // u: returned value [0,1] of angle around the Y axis from X=-1.
         // v: returned value [0,1] of angle from Y=-1 to Y=+1.
@@ -31,12 +31,12 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> Option<HitRecord> {
+    fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f32>) -> Option<HitRecord> {
         //光源指向球心
         let oc = ray_in.origin() - self.center;
-        let a = ray_in.direction().len_squared();
+        let a = ray_in.direction().length_squared();
         let half_b = oc.dot(ray_in.direction());
-        let c = oc.len_squared() - self.radius * self.radius;
+        let c = oc.length_squared() - self.radius * self.radius;
         let delta = half_b * half_b - a * c;
         if delta < 0. {
             None
@@ -58,11 +58,11 @@ impl Hittable for Sphere {
         }
     }
 
-    fn bounding_box(&self, _time: &std::ops::Range<f64>) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, _time: &std::ops::Range<f32>) -> Option<crate::aabb::AABB> {
         let r = self.radius;
         Some(AABB::new(
-            self.center - Vec3::new(r, r, r),
-            self.center + Vec3::new(r, r, r),
+            self.center - vec3(r, r, r),
+            self.center + vec3(r, r, r),
         ))
     }
 }

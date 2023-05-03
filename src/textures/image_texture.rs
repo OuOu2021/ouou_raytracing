@@ -35,13 +35,13 @@ impl ImageTexture {
 }
 
 impl Texture for ImageTexture {
-    fn value(&self, uv: (f64, f64), _p: Point3) -> Color {
+    fn value(&self, uv: (f32, f32), _p: Point3) -> Color {
         if let Some(img) = &self.data {
             // v是仰角，越大越靠上，但图像y越大是越下方，所以要用1减去它否则地球会倒置
             let uv = (uv.0.clamp(0., 1.), 1.0 - uv.1.clamp(0., 1.));
             let (mut i, mut j) = (
-                (uv.0 * img.width() as f64) as u32,
-                (uv.1 * img.height() as f64) as u32,
+                (uv.0 * img.width() as f32) as u32,
+                (uv.1 * img.height() as f32) as u32,
             );
 
             if i >= img.width() {
@@ -56,9 +56,9 @@ impl Texture for ImageTexture {
             let pixel = img.get_pixel(i, j);
 
             Color::new(
-                color_scale * pixel.0[0] as f64,
-                color_scale * pixel.0[1] as f64,
-                color_scale * pixel.0[2] as f64,
+                color_scale * pixel.0[0] as f32,
+                color_scale * pixel.0[1] as f32,
+                color_scale * pixel.0[2] as f32,
             )
         } else {
             Color::new(0., 1., 1.)

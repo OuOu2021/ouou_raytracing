@@ -2,7 +2,7 @@ use crate::{
     aabb::AABB,
     material::Material,
     ray::Ray,
-    vec3::{Point3, Vec3},
+    vec3::{Point3, Vec3, Vec3Funcs, vec3},
 };
 use std::{ops::Range, sync::Arc};
 
@@ -11,21 +11,21 @@ pub struct HitRecord<'a> {
     pub p: Point3,
     // 法向量
     pub normal: Vec3,
-    pub t: f64,
+    pub t: f32,
     pub front_face: Option<bool>,
     pub material: &'a dyn Material,
 
     // uv coordinates of hit point's texture
-    pub texture_uv: (f64, f64),
+    pub texture_uv: (f32, f32),
 }
 
 impl<'a> HitRecord<'a> {
     pub fn new(
         p: Point3,
         normal: Vec3,
-        t: f64,
+        t: f32,
         material: &'a dyn Material,
-        uv: (f64, f64),
+        uv: (f32, f32),
     ) -> Self {
         Self {
             p,
@@ -47,8 +47,8 @@ impl<'a> HitRecord<'a> {
 }
 
 pub trait Hittable: Sync + Send {
-    fn hit(&self, ray_in: &Ray, t_range: &Range<f64>) -> Option<HitRecord>;
-    fn bounding_box(&self, time: &Range<f64>) -> Option<AABB>;
+    fn hit(&self, ray_in: &Ray, t_range: &Range<f32>) -> Option<HitRecord>;
+    fn bounding_box(&self, time: &Range<f32>) -> Option<AABB>;
 }
 
 pub mod bvh;
