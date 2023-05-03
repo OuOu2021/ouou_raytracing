@@ -13,7 +13,7 @@ fn render_medium() {
     test_render(
         Camera::new(
             (Point3::new(278., 278.0, -800.), Point3::new(278., 278., 0.)),
-            Vec3::new(0., 1., 0.),
+            vec3(0., 1., 0.),
             40.,
             1.,
             0.0,
@@ -22,7 +22,7 @@ fn render_medium() {
         ),
         800,
         400,
-        Color::black(),
+        Color::BLACK,
         &cornell_smoke(),
         function_name!(),
     );
@@ -40,7 +40,7 @@ fn cornell_smoke() -> HittableList {
         white.clone(),
     ));
     let box1 = Arc::new(RotateY::new(box1, 15.));
-    let box1 = Arc::new(Translate::new(box1, Vec3::new(265., 0., 295.)));
+    let box1 = Arc::new(Translate::new(box1, vec3(265., 0., 295.)));
     let box1 = Arc::new(ConstantMedium::new_with_color(
         box1,
         Color::new(0., 0., 0.),
@@ -54,7 +54,7 @@ fn cornell_smoke() -> HittableList {
         white.clone(),
     ));
     let box2 = Arc::new(RotateY::new(box2, -18.));
-    let box2 = Arc::new(Translate::new(box2, Vec3::new(130., 0., 65.)));
+    let box2 = Arc::new(Translate::new(box2, vec3(130., 0., 65.)));
     let box2 = Arc::new(ConstantMedium::new_with_color(
         box2,
         Color::new(1., 1., 1.),

@@ -8,7 +8,7 @@ pub struct CheckerTexture {
 }
 
 impl Texture for CheckerTexture {
-    fn value(&self, uv: (f64, f64), p: Point3) -> Color {
+    fn value(&self, uv: (f32, f32), p: Point3) -> Color {
         let sines = (10. * p.x()).sin() * (10. * p.y()).sin() * (10. * p.z()).sin();
         if sines < 0. {
             self.odd.value(uv, p)

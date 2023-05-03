@@ -1,10 +1,10 @@
 use super::*;
 pub struct Metal {
     albedo: Color,
-    fuzz: f64,
+    fuzz: f32,
 }
 impl Metal {
-    pub fn new(albedo: Color, fuzz: f64) -> Self {
+    pub fn new(albedo: Color, fuzz: f32) -> Self {
         Self {
             albedo,
             fuzz: clamp(fuzz, 0.0..1.0),

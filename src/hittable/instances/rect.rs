@@ -70,12 +70,12 @@ impl Hittable for Rectangular {
     fn hit(
         &self,
         ray_in: &crate::ray::Ray,
-        t_range: &std::ops::Range<f64>,
+        t_range: &std::ops::Range<f32>,
     ) -> Option<crate::hittable::HitRecord> {
         self.sides.hit(ray_in, t_range)
     }
 
-    fn bounding_box(&self, _time: &std::ops::Range<f64>) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, _time: &std::ops::Range<f32>) -> Option<crate::aabb::AABB> {
         Some(AABB::new(self.box_min, self.box_max))
     }
 }

@@ -13,7 +13,7 @@ use ouou_raytracing::{
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     renderer,
     textures::image_texture::ImageTexture,
-    vec3::{Color, Point3, Vec3},
+    vec3::{Color, Point3, vec3},
 };
 
 fn bench(c: &mut Criterion) {
@@ -29,7 +29,7 @@ fn bench(c: &mut Criterion) {
                         Point3::new(278.0, 278.0, -800.0),
                         Point3::new(278., 278., 0.),
                     ),
-                    Vec3::new(0., 1., 0.),
+                    vec3(0., 1., 0.),
                     40.,
                     1.,
                     0.0,
@@ -38,7 +38,7 @@ fn bench(c: &mut Criterion) {
                 ),
                 1000,
                 3000,
-                Color::black(),
+                Color::BLACK,
                 &generate_box(),
                 "bench",
             )
@@ -59,7 +59,7 @@ fn generate_box() -> HittableList {
                 )),
                 15.
             )),
-            Vec3::new(265., 0., 295.)
+            vec3(265., 0., 295.)
         )),
         Arc::new(Translate::new(
             Arc::new(RotateY::new(
@@ -70,7 +70,7 @@ fn generate_box() -> HittableList {
                 )),
                 -18.
             )),
-            Vec3::new(130., 0., 65.)
+            vec3(130., 0., 65.)
         )),
         Arc::new(Translate::new(
             Arc::new(Sphere::new(
@@ -80,7 +80,7 @@ fn generate_box() -> HittableList {
                     "res/earthmap.jpg"
                 ))))
             )),
-            Vec3::new(185., 245., 150.)
+            vec3(185., 245., 150.)
         )),
         Arc::new(Translate::new(
             Arc::new(MovingSphere::new(
@@ -89,7 +89,7 @@ fn generate_box() -> HittableList {
                 Arc::new(Lambertian::new(Color::new(0.3984375, 0.796875, 0.99))),
                 0.0..1.0
             )),
-            Vec3::new(350., 180., 40.)
+            vec3(350., 180., 40.)
         )),
         Arc::new(Translate::new(
             Arc::new(Sphere::new(
@@ -97,7 +97,7 @@ fn generate_box() -> HittableList {
                 60.,
                 Arc::new(Dielectric::new(1.5))
             )),
-            Vec3::new(350., 60., 40.)
+            vec3(350., 60., 40.)
         )),
         Arc::new(Translate::new(
             Arc::new(Sphere::new(
@@ -105,7 +105,7 @@ fn generate_box() -> HittableList {
                 60.,
                 Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.1))
             )),
-            Vec3::new(265. + 165. / 2., 390., 295. + 165. / 2.)
+            vec3(265. + 165. / 2., 390., 295. + 165. / 2.)
         ))
     )
 }

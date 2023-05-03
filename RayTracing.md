@@ -111,7 +111,7 @@ $$\vec b\cdot \vec b \cdot t^2+2\vec b\cdot(\vec A−\vec C) \cdot t+(\vec A−\
 ### 抽象出与光线交互的物体Object
 当前球被硬编码到`ray_color`中，难以方便地添加更多物体，所以需要抽象出能与光线交互的物体类。在Rust中是用行为来抽象成Trait，命名为`Hittable`
 
-内含成员函数`hit(r: &ray,t_range: &std::ops::Range<f64>) -> Option<HitRecord>`
+内含成员函数`hit(r: &ray,t_range: &std::ops::Range<f32>) -> Option<HitRecord>`
 * `HitRecord`用于记录光打在物体上的t值、法线、交点与法线朝向信息(从内往外还是从外往内，通过光线方向与朝外法线的点乘结果来判定，点乘大于零->同向->法线从内往外)
 * `t_range`能方便地限制想要与光交互的物体区域范围
 
@@ -511,7 +511,7 @@ $$u = \frac i {N_x-1}, v = \frac j {N_y-1}$$
 早期光追渲染器用抽象光源(点光源/线光源)；而现代渲染器有了更物理的光源，拥有位置和大小。我们可以让任何物体发光
 
 ### 发光材料
-`Material`新增`emitted`方法，表示发光属性，`ray_color`生成颜色时与`scatter`结果相加，默认实现直接返回`Color::black()`代表不发光
+`Material`新增`emitted`方法，表示发光属性，`ray_color`生成颜色时与`scatter`结果相加，默认实现直接返回`Color::BLACK`代表不发光
 
 ### 背景颜色
 不再插值计算背景颜色，而是用纯色来作为背景，默认为黑色
@@ -612,7 +612,7 @@ Auto-detecting system features:
 体积和表面几乎是完全不同的两样东西，这可能加剧我们软件渲染架构的混乱。而一个有意思的技术是把体积当成随机存在的表面
 
 ### 密度一定的介质 Constant Density Mediums
-进入介质的光可能从内部某点散射，也可能径直穿过介质。根据密度不同这两者的分配情况不同
+进入介质的光可能从内部某点散射，也可能径直穿过介质。根据密度不同这两者的分配情况不同 
 
 ## 成果
 ![](./imgs/final_2.png)

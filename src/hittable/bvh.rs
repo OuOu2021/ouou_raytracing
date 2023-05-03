@@ -7,7 +7,7 @@ use super::{hittable_list::HittableList, *};
 /// Bounding Volume Hierarchies 层次包围盒
 ///
 /// 用于加速计算光线与多个物体组合相交。
-/// 通过划分空间，将$hit()$方法检索n个物体的复杂度从$O(N)$优化至$O(\log N)$
+/// 通过划分空间，将 $hit()$ 方法检索n个物体的复杂度从 $O(N)$ 优化至 $O(\log N)$
 pub struct BvhNode {
     left: Arc<dyn Hittable>,
     right: Arc<dyn Hittable>,
@@ -15,10 +15,10 @@ pub struct BvhNode {
 }
 
 impl BvhNode {
-    pub fn from_hittable_list(mut list: HittableList, t_range: &Range<f64>) -> Self {
+    pub fn from_hittable_list(mut list: HittableList, t_range: &Range<f32>) -> Self {
         Self::new(list.get_objects_mut(), t_range)
     }
-    pub fn new(src_object: &mut [Arc<dyn Hittable>], t_range: &Range<f64>) -> Self {
+    pub fn new(src_object: &mut [Arc<dyn Hittable>], t_range: &Range<f32>) -> Self {
         let comparator = thread_rng().gen_range(0usize..3);
         let left: Arc<dyn Hittable>;
         let right: Arc<dyn Hittable>;
@@ -78,7 +78,7 @@ impl Hittable for BvhNode {
     fn hit(
         &self,
         ray_in: &crate::ray::Ray,
-        t_range: &std::ops::Range<f64>,
+        t_range: &std::ops::Range<f32>,
     ) -> Option<crate::hittable::HitRecord> {
         if !self.bounding_box.hit(ray_in, t_range) {
             None
@@ -104,7 +104,7 @@ impl Hittable for BvhNode {
         }
     }
 
-    fn bounding_box(&self, _time: &std::ops::Range<f64>) -> Option<AABB> {
+    fn bounding_box(&self, _time: &std::ops::Range<f32>) -> Option<AABB> {
         Some(self.bounding_box)
     }
 }

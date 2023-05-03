@@ -17,7 +17,7 @@ impl AABB {
             maximum: b,
         }
     }
-    pub fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f64>) -> bool {
+    pub fn hit(&self, ray_in: &crate::ray::Ray, t_range: &std::ops::Range<f32>) -> bool {
         let mut r = t_range.clone();
 
         for i in 0..3 {

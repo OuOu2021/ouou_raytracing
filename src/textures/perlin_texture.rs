@@ -2,7 +2,7 @@ use std::array::from_fn;
 
 use rand::{seq::SliceRandom, thread_rng};
 
-use crate::vec3::Vec3;
+use crate::{vec3::Vec3, Vec3Funcs};
 
 use super::*;
 static POINT_COUNT: usize = 256;
@@ -31,7 +31,7 @@ impl Perlin {
     pub fn new() -> Self {
         Default::default()
     }
-    pub fn noise(&self, p: &Point3) -> f64 {
+    pub fn noise(&self, p: &Point3) -> f32 {
         // 晶格内位置
         let (u, v, w) = (
             p.x() - p.x().floor(),
@@ -39,7 +39,7 @@ impl Perlin {
             p.z() - p.z().floor(),
         );
         // 处在哪一个晶格
-        let floor = |x: f64| x.floor() as i32;
+        let floor = |x: f32| x.floor() as i32;
         let (i, j, k) = (floor(p.x()), floor(p.y()), floor(p.z()));
 
         // 获取周围八个晶格点，哈希到随机向量范围之内
@@ -55,7 +55,7 @@ impl Perlin {
         perlin_interpolation(c, u, v, w)
     }
     /// 搅动
-    pub fn turb_with_depth(&self, p: &Point3, depth: usize) -> f64 {
+    pub fn turb_with_depth(&self, p: &Point3, depth: usize) -> f32 {
         let mut tmp_p = *p * 0.5;
         let mut weight = 2.;
         (0..depth)
@@ -64,10 +64,10 @@ impl Perlin {
                 tmp_p = tmp_p * 2.;
                 weight * self.noise(&tmp_p)
             })
-            .sum::<f64>()
+            .sum::<f32>()
             .abs()
     }
-    pub fn turb(&self, p: &Point3) -> f64 {
+    pub fn turb(&self, p: &Point3) -> f32 {
         self.turb_with_depth(p, 7)
     }
 }
@@ -82,13 +82,13 @@ fn permute(mut v: Vec<usize>) -> Vec<usize> {
     v
 }
 
-fn perlin_interpolation(c: [[[Vec3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
+fn perlin_interpolation(c: [[[Vec3; 2]; 2]; 2], u: f32, v: f32, w: f32) -> f32 {
     // Hermite插值
     let f = |x| x * x * (3. - 2. * x);
     let (uu, vv, ww) = (f(u), f(v), f(w));
 
     // ?
-    let f2 = |x, y| x as f64 * y + (1. - x as f64) * (1. - y);
+    let f2 = |x, y| x as f32 * y + (1. - x as f32) * (1. - y);
 
     // 遍历三维中相邻的八个晶格点
     (0..2)
@@ -98,27 +98,28 @@ fn perlin_interpolation(c: [[[Vec3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
                     (0..2)
                         .map(|k| {
                             // 计算相对位置向量
-                            let weight_vec = Vec3::new(u - i as f64, v - j as f64, w - k as f64);
+                            let weight_vec = Vec3::new(u - i as f32, v - j as f32, w - k as f32);
 
                             // 梯度加权求和得出灰度
                             f2(i, uu) * f2(j, vv) * f2(k, ww) * c[i][j][k].dot(weight_vec)
                         })
-                        .sum::<f64>()
+                        .sum::<f32>()
                 })
-                .sum::<f64>()
+                .sum::<f32>()
         })
         .sum()
 }
 
 /// 噪声纹理，目前只实现了柏林噪声
 /// 之后可以把`Noise`抽象成`Trait`并添加更多随机纹理
+/// 已知问题：合适的scale与图形尺寸相关，很难确定合适的倍率
 pub struct NoiseTexture {
     noise: Perlin,
-    scale: f64,
+    scale: f32,
 }
 
 impl NoiseTexture {
-    pub fn new(scale: f64) -> Self {
+    pub fn new(scale: f32) -> Self {
         Self {
             noise: Default::default(),
             scale,
@@ -136,7 +137,7 @@ impl Default for NoiseTexture {
 }
 
 impl Texture for NoiseTexture {
-    fn value(&self, _uv: (f64, f64), p: Point3) -> Color {
+    fn value(&self, _uv: (f32, f32), p: Point3) -> Color {
         // 0.5*(1+x) 把-1~1的x转换到0~1之间，防止GAMMA的sqrt出现NaN
         Color::new(1., 1., 1.) * 0.5 * (1. + (p.z() * self.scale + 10. * self.noise.turb(&p)).sin())
     }

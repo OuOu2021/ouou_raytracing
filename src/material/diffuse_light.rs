@@ -22,7 +22,7 @@ impl DiffuseLight {
 impl Default for DiffuseLight {
     fn default() -> Self {
         Self {
-            emit: Arc::new(SolidColor::new(Color::white())),
+            emit: Arc::new(SolidColor::new(Color::WHITE)),
         }
     }
 }
@@ -32,7 +32,7 @@ impl Material for DiffuseLight {
         None
     }
 
-    fn emitted(&self, uv: (f64, f64), p: Point3) -> Color {
+    fn emitted(&self, uv: (f32, f32), p: Point3) -> Color {
         self.emit.value(uv, p)
     }
 }

@@ -16,7 +16,7 @@ fn render_final_2() {
     test_render(
         Camera::new(
             (Point3::new(478., 278., -600.), Point3::new(278., 278., 0.)),
-            Vec3::new(0., 1., 0.),
+            vec3(0., 1., 0.),
             40.,
             1.,
             0.0,
@@ -24,8 +24,8 @@ fn render_final_2() {
             0.0..1.0,
         ),
         800,
-        2000,
-        Color::black(),
+        1000,
+        Color::BLACK,
         &final_scene_2(),
         function_name!(),
     );
@@ -38,8 +38,8 @@ fn final_scene_2() -> HittableList {
     let boxes_per_side = 20;
     (0..boxes_per_side).for_each(|i| {
         (0..boxes_per_side).for_each(|j| {
-            let i = i as f64;
-            let j = j as f64;
+            let i = i as f32;
+            let j = j as f32;
             let w = 100.;
             let x_0 = -1000.0 + i * w;
             let z_0 = -1000.0 + j * w;
@@ -67,7 +67,7 @@ fn final_scene_2() -> HittableList {
     )));
 
     let center_1 = Point3::new(400., 400., 200.);
-    let center_2 = center_1 + Vec3::new(30., 0., 0.);
+    let center_2 = center_1 + vec3(30., 0., 0.);
     let moving_sphere_mat = Arc::new(Lambertian::new(Color::new(0.7, 0.3, 0.1)));
     objs.add(Arc::new(MovingSphere::new(
         (center_1, center_2),
@@ -141,7 +141,7 @@ fn final_scene_2() -> HittableList {
             Arc::new(BvhNode::from_hittable_list(boxes_2, &(0.0..1.0))),
             15.0,
         )),
-        Vec3::new(-100., 270., 395.),
+        vec3(-100., 270., 395.),
     )));
 
     objs

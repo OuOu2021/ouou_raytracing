@@ -4,7 +4,7 @@ use rand::{thread_rng, Rng};
 
 use crate::{
     ray::Ray,
-    vec3::{Point3, Vec3},
+    vec3::{Point3, Vec3, vec3}, Vec3Funcs,
 };
 
 /// 相机类
@@ -15,20 +15,20 @@ pub struct Camera {
     lower_left_corner: Point3,
     horizontal: Vec3,
     vertical: Vec3,
-    lens_radius: f64,
+    lens_radius: f32,
     u: Vec3,
     v: Vec3,
     _w: Vec3,
     // shutter and close
-    time: Range<f64>,
-    aspect_ratio: f64,
+    time: Range<f32>,
+    aspect_ratio: f32,
 }
 
 impl Default for Camera {
     fn default() -> Self {
         let look_from = Point3::new(13., 2.0, 5.);
         let look_at = Point3::new(0., 0., 0.);
-        let vup = Vec3::new(0., 1., 0.);
+        let vup = vec3(0., 1., 0.);
         let dist_to_focus = 10.0;
         let aperture = 0.1;
 
@@ -46,9 +46,9 @@ impl Default for Camera {
 
 impl Camera {
     ///
-    pub fn get_ray(&self, st: (f64, f64)) -> Ray {
+    pub fn get_ray(&self, st: (f32, f32)) -> Ray {
         let random_disk = self.lens_radius * Vec3::random_in_unit_disk();
-        let offset = self.u * random_disk.x() + self.v * random_disk.y();
+        let offset = self.u * random_disk.x + self.v * random_disk.y;
 
         Ray::new(
             self.origin + offset,
@@ -64,12 +64,12 @@ impl Camera {
         look: (Point3, Point3),
         view_up: Vec3,
         // vertical field-of-view in degrees
-        vfov: f64,
-        aspect_ratio: f64,
-        aperture: f64,
+        vfov: f32,
+        aspect_ratio: f32,
+        aperture: f32,
         // distance from focus plane
-        focus_dist: f64,
-        time: Range<f64>,
+        focus_dist: f32,
+        time: Range<f32>,
     ) -> Self {
         let theta = vfov.to_radians();
         let h = (theta / 2.).tan();
@@ -100,7 +100,7 @@ impl Camera {
             aspect_ratio,
         }
     }
-    pub fn get_aspect_ratio(&self) -> f64 {
+    pub fn get_aspect_ratio(&self) -> f32 {
         self.aspect_ratio
     }
 }

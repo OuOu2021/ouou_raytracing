@@ -316,6 +316,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "glam"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad83ab008a4fa3b31dfa713dd41b5a9bdea1e94e4cf1e2fc274ffbd49b0271d3"
+dependencies = [
+ "rand",
+]
+
+[[package]]
 name = "half"
 version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -544,6 +553,7 @@ version = "0.2.0"
 dependencies = [
  "criterion",
  "function_name",
+ "glam",
  "image",
  "rand",
  "rayon",

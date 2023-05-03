@@ -2,14 +2,14 @@ use super::*;
 
 pub struct Dielectric {
     /// Index of Refraction,折射率
-    ir: f64,
+    ir: f32,
 }
 
 impl Dielectric {
-    pub fn new(ir: f64) -> Self {
+    pub fn new(ir: f32) -> Self {
         Self { ir }
     }
-    fn reflectance(cosine: f64, ref_index: f64) -> f64 {
+    fn reflectance(cosine: f32, ref_index: f32) -> f32 {
         // Use(Copy) Schlick's approximation for reflectance.
         let r0 = ((1. - ref_index) / (1. + ref_index)).powf(2.);
         r0 + (1. - r0) * (1. - cosine).powf(5.)
